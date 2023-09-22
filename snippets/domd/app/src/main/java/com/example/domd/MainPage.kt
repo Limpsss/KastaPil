@@ -1,23 +1,42 @@
-package com.example.domd.ui
+package com.example.domd
 
 import android.app.AlertDialog
 import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import com.example.domd.R
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainPage : AppCompatActivity() {
-    private lateinit var domd: TextView;
-    private lateinit var user: TextView;
-    private lateinit var createGame: Button;
-    private var username = "";
-    private var guest: Boolean = false;
+    private val TAG = "MainPage"
+
+    private lateinit var domd: TextView
+    private lateinit var user: TextView
+    private lateinit var createGame: Button
+    private var username = ""
+    private var password = ""
+    private var guest: Boolean = false
+
+    private var db = FirebaseFirestore.getInstance()
+    private var infoRef = db.collection("secretStuff").document("test")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_page)
+
+        infoRef.get()
+            .addOnSuccessListener { data ->
+                if (data != null) {
+                    Log.d(TAG, "Data: ${data.data}")
+                } else {
+                    Log.d(TAG, "No such document")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d(TAG, "get failed with ", exception)
+            }
 
         createWidgets()
     }

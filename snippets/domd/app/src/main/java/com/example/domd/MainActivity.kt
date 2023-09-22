@@ -1,4 +1,4 @@
-package com.example.domd.ui
+package com.example.domd
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.example.domd.R
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : AppCompatActivity() {
@@ -20,9 +19,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonGuestLogin: Button
     private lateinit var editTextUsername: EditText
     private lateinit var editTextPassword: EditText
-    
+
     private var db = FirebaseFirestore.getInstance()
-    private var infoRef = db.collection("secretStuff").document()
+    private var infoRef = db.collection("secretStuff").document("test")
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +56,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun login(username: String, password: String) {
-        val info = mapOf (
+
+        val info = mapOf(
             KEY_TITLE to username,
             KEY_DESCRIPTION to password
         )
