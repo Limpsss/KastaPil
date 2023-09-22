@@ -1,4 +1,4 @@
-package com.example.domd
+package com.example.domd.ui
 
 import android.app.AlertDialog
 import android.content.DialogInterface
@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import com.example.domd.R
 
 class MainPage : AppCompatActivity() {
     private lateinit var domd: TextView;

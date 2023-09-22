@@ -13,10 +13,10 @@
         android:theme="@style/Theme.Domd"
         tools:targetApi="31">
         <activity
-            android:name=".MainPage"
+            android:name=".ui.MainPage"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
