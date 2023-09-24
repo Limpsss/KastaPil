@@ -1,12 +1,14 @@
 package com.example.kastapil
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,10 +40,8 @@ fun SignInScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
     ) {
-        val textFieldValue1 = remember { mutableStateOf("") }
-        val textFieldValue2 = remember { mutableStateOf("") }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -48,21 +50,14 @@ fun SignInScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            TextFieldView(textFieldValue1)
-            TextFieldView(textFieldValue2)
+            TextFieldView(false)
+
+            TextFieldView(true)
 
             Button(
                 onClick = {
-                    var username = textFieldValue1.value
-                    var password = textFieldValue2.value
-                    if (username == "") {
-                        username = "empty"
-                    }
-                    if (password == "") {
-                        password = "empty"
-                    }
                     navController.navigate(
-                        route = "home_screen/$username/$password"
+                        route = Screen.Home.route
                     )
                 },
             ) {
@@ -74,7 +69,10 @@ fun SignInScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TextFieldView(textState: MutableState<String>) {
+fun TextFieldView(isPassword: Boolean) {
+    val textState = remember { mutableStateOf("") }
+    val placeholder = if (isPassword) "Password" else "Username"
+    val label = if(isPassword) "Password" else "Username"
 
     OutlinedTextField (
         value = textState.value,
@@ -84,16 +82,19 @@ fun TextFieldView(textState: MutableState<String>) {
         modifier = Modifier.padding(5.dp),
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color.White,
-            unfocusedIndicatorColor = Color.Blue,
-            focusedIndicatorColor = Color.Red,
+            unfocusedIndicatorColor = Color.Black,
+            focusedIndicatorColor = Color.Blue,
 
-        )
+        ),
+        shape = RoundedCornerShape(percent = 20),
+        placeholder = { Text(text = placeholder)},
+        label = {Text(text = label)},
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
     )
-    Log.d("tag69", textState.value)
 }
 
-@Composable
-@Preview(showBackground = true)
-fun SignInScreenPreview() {
-    SignInScreen(navController = rememberNavController())
-}
+//@Composable
+//@Preview(showBackground = true)
+//fun SignInScreenPreview() {
+//    SignInScreen(navController = rememberNavController())
+//}

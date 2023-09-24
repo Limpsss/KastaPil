@@ -27,9 +27,7 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
-    username: String,
-    password: String
+    navController: NavController
 ) {
     val animatedBlur = animateDpAsState(targetValue = 30.dp, label = "")
     
@@ -56,8 +54,6 @@ fun HomeScreen(
             contentDescription = "dartboard",
             modifier = Modifier
                 .fillMaxWidth(),
-//                contentScale = ContentScale.Crop
-//                    .height(200.dp)
         )
 
         Button(

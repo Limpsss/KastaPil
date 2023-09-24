@@ -25,25 +25,15 @@ fun SetUpNavHost(
 
         composable(
             route = Screen.Home.route,
-            arguments = listOf(
-                navArgument("username") {
-                    type = NavType.StringType
-                },
-                navArgument("password") {
-                    type = NavType.StringType
-                })
-
         ){
-            val username = it.arguments?.getString("username").toString()
-            val password = it.arguments?.getString("password").toString()
 
-            HomeScreen(navController, username, password)
+            HomeScreen(navController)
         }
 
         composable(
             route = Screen.CreateGame.route
         ){
-            CreateGameScreen()
+            CreateGameScreen(navController)
         }
     }
 }
