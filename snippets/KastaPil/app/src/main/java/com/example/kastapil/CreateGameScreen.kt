@@ -85,6 +85,10 @@ fun CreateGameScreen(navController: NavController) {
 fun GameTypeBox() {
     val is301Selected = remember { mutableStateOf(true) }
     val is501Selected = remember { mutableStateOf(false) }
+    val buttonMap: Map<String, MutableState<Boolean>> = mapOf(
+        "301" to is301Selected,
+        "501" to is501Selected
+    )
 
     Box(
         modifier = Modifier
@@ -110,9 +114,9 @@ fun GameTypeBox() {
                 verticalAlignment = Alignment.Bottom
             ) {
 
-                CustomButton("301", is301Selected, is501Selected)
+                CustomButton("301", buttonMap)
                 Spacer(modifier = Modifier.width(32.dp))
-                CustomButton("501", is501Selected, is301Selected)
+                CustomButton("501", buttonMap)
             }
         }
     }
@@ -121,19 +125,24 @@ fun GameTypeBox() {
 @Composable
 fun CustomButton(
     text: String,
-    thisSelected: MutableState<Boolean>,
-    otherSelected: MutableState<Boolean>
+    buttonMap: Map<String, MutableState<Boolean>>
 ) {
-
     OutlinedButton(
         modifier = Modifier
             .padding(bottom = 16.dp)
             .size(width = 110.dp, height = 40.dp),
         onClick = {
-            thisSelected.value = true
-            otherSelected.value = false
+
+            buttonMap.forEach { (buttonText, buttonBool) ->
+                buttonBool.value = (text == buttonText)
+            }
+
         },
-        border = if (thisSelected.value) BorderStroke(2.dp, Color.Yellow) else BorderStroke(0.dp, Color.Transparent),
+        border = if (buttonMap[text]?.value == true) {
+            BorderStroke(2.dp, Color.Yellow)
+        } else {
+            BorderStroke(0.dp, Color.Transparent)
+        },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
 
     ) {
@@ -143,6 +152,15 @@ fun CustomButton(
 
 @Composable
 fun BestOfBox() {
+    val isBo1Selected = remember { mutableStateOf(true) }
+    val isBo3Selected = remember { mutableStateOf(false) }
+    val isBo5Selected = remember { mutableStateOf(false) }
+    val buttonMap: Map<String, MutableState<Boolean>> = mapOf(
+        "Bo1" to isBo1Selected,
+        "Bo3" to isBo3Selected,
+        "Bo5" to isBo5Selected
+    )
+
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(18.dp))
@@ -166,33 +184,11 @@ fun BestOfBox() {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
-                Button(
-                    modifier = Modifier
-                        .padding(bottom = 10.dp),
-                    onClick = { /*TODO*/ }
-                ) {
-                    Text(text = "BO1")
-                }
-
-                Spacer(modifier = Modifier.width(24.dp)) // Add spacing here
-
-                Button(
-                    modifier = Modifier
-                        .padding(bottom = 10.dp),
-                    onClick = { /*TODO*/ }
-                ){
-                    Text(text = "BO3")
-                }
-
-                Spacer(modifier = Modifier.width(24.dp)) // Add spacing here
-
-                Button(
-                    modifier = Modifier
-                        .padding(bottom = 10.dp),
-                    onClick = { /*TODO*/ }
-                ){
-                    Text(text = "BO5")
-                }
+                CustomButton(text = "Bo1", buttonMap = buttonMap)
+                Spacer(modifier = Modifier.width(24.dp))
+                CustomButton(text = "Bo3", buttonMap = buttonMap)
+                Spacer(modifier = Modifier.width(24.dp))
+                CustomButton(text = "Bo5", buttonMap = buttonMap)
             }
         }
     }
@@ -200,6 +196,12 @@ fun BestOfBox() {
 
 @Composable
 fun ChoosePlayersBox() {
+    val isPlayerOneSelected = remember { mutableStateOf(true) }
+    val isPlayerTwoSelected = remember { mutableStateOf(false) }
+    val buttonMap: Map<String, MutableState<Boolean>> = mapOf(
+        "1 Player" to isPlayerOneSelected,
+        "2 Players" to isPlayerTwoSelected
+    )
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(18.dp))
@@ -223,19 +225,9 @@ fun ChoosePlayersBox() {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
-                Button(
-                    onClick = { /*TODO*/ }
-                ) {
-                    Text(text = "301")
-                }
-
+                CustomButton(text = "1 Player", buttonMap = buttonMap)
                 Spacer(modifier = Modifier.width(32.dp)) // Add spacing here
-
-                Button(
-                    onClick = { /*TODO*/ }
-                ){
-                    Text(text = "501")
-                }
+                CustomButton(text = "2 Players", buttonMap = buttonMap)
             }
         }
     }
