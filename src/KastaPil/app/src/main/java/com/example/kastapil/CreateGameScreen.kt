@@ -66,17 +66,11 @@ fun CreateGameScreen(navController: NavController) {
 
         ) {
             Spacer(modifier = Modifier.height(60.dp))
-
             GameTypeBox()
-
             Spacer(modifier = Modifier.height(30.dp))
-
             BestOfBox()
-
             Spacer(modifier = Modifier.height(30.dp))
-
             ChoosePlayersBox()
-
         }
     }
 }
@@ -114,39 +108,11 @@ fun GameTypeBox() {
                 verticalAlignment = Alignment.Bottom
             ) {
 
-                CustomButton("301", buttonMap)
+                CustomButton("301", true, buttonMap)
                 Spacer(modifier = Modifier.width(32.dp))
-                CustomButton("501", buttonMap)
+                CustomButton("501", true, buttonMap)
             }
         }
-    }
-}
-
-@Composable
-fun CustomButton(
-    text: String,
-    buttonMap: Map<String, MutableState<Boolean>>
-) {
-    OutlinedButton(
-        modifier = Modifier
-            .padding(bottom = 16.dp)
-            .size(width = 110.dp, height = 40.dp),
-        onClick = {
-
-            buttonMap.forEach { (buttonText, buttonBool) ->
-                buttonBool.value = (text == buttonText)
-            }
-
-        },
-        border = if (buttonMap[text]?.value == true) {
-            BorderStroke(2.dp, Color.Yellow)
-        } else {
-            BorderStroke(0.dp, Color.Transparent)
-        },
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-
-    ) {
-        Text(text = text, color = Color.White)
     }
 }
 
@@ -184,11 +150,11 @@ fun BestOfBox() {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
-                CustomButton(text = "Bo1", buttonMap = buttonMap)
-                Spacer(modifier = Modifier.width(24.dp))
-                CustomButton(text = "Bo3", buttonMap = buttonMap)
-                Spacer(modifier = Modifier.width(24.dp))
-                CustomButton(text = "Bo5", buttonMap = buttonMap)
+                CustomButton(text = "Bo1", false, buttonMap = buttonMap)
+                Spacer(modifier = Modifier.width(18.dp))
+                CustomButton(text = "Bo3", false, buttonMap = buttonMap)
+                Spacer(modifier = Modifier.width(18.dp))
+                CustomButton(text = "Bo5", false, buttonMap = buttonMap)
             }
         }
     }
@@ -225,11 +191,42 @@ fun ChoosePlayersBox() {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
-                CustomButton(text = "1 Player", buttonMap = buttonMap)
+                CustomButton(text = "1 Player", true, buttonMap = buttonMap)
                 Spacer(modifier = Modifier.width(32.dp)) // Add spacing here
-                CustomButton(text = "2 Players", buttonMap = buttonMap)
+                CustomButton(text = "2 Players", true, buttonMap = buttonMap)
             }
         }
+    }
+}
+
+@Composable
+fun CustomButton(
+    text: String,
+    bigButton: Boolean,
+    buttonMap: Map<String, MutableState<Boolean>>
+) {
+    OutlinedButton(
+        modifier = Modifier
+            .padding(bottom = 16.dp)
+            .size(
+                width = if (bigButton) 115.dp else 80.dp, // Changing based on "bigButton"
+                height = 40.dp
+            ),
+        onClick = {
+            buttonMap.forEach { (buttonText, buttonBool) ->
+                buttonBool.value = (text == buttonText)
+            }
+
+        },
+        border = if (buttonMap[text]?.value == true) {
+            BorderStroke(2.dp, Color.Yellow)
+        } else {
+            BorderStroke(0.dp, Color.Transparent)
+        },
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+
+    ) {
+        Text(text = text, color = Color.White)
     }
 }
 
