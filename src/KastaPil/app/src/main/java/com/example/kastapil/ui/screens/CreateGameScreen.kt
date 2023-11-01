@@ -1,4 +1,4 @@
-package com.example.kastapil
+package com.example.kastapil.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
@@ -10,19 +10,24 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -31,17 +36,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.kastapil.navigation.Screen
+import com.example.kastapil.viewModels.CreateGameViewModel
 
 @Composable
-fun CreateGameScreen(navController: NavController) {
+fun CreateGameScreen(navController: NavController, viewModel: CreateGameViewModel) {
+    val scrollState = rememberScrollState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
+            .verticalScroll(scrollState)
 
     ) {
         Text(
@@ -57,7 +69,6 @@ fun CreateGameScreen(navController: NavController) {
             text = "x",
             color = Color.White,
             fontSize = 28.sp,
-
             )
 
         Column(
@@ -66,23 +77,38 @@ fun CreateGameScreen(navController: NavController) {
 
         ) {
             Spacer(modifier = Modifier.height(60.dp))
-            GameTypeBox()
+            GameTypeBox(viewModel)
             Spacer(modifier = Modifier.height(30.dp))
-            BestOfBox()
+            BestOfBox(viewModel)
             Spacer(modifier = Modifier.height(30.dp))
-            ChoosePlayersBox()
+            ChoosePlayersBox(viewModel)
+        }
+
+        Button(
+            colors = ButtonDefaults.buttonColors(Color.LightGray),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 20.dp)
+                .size(width = 210.dp, height = 60.dp)
+                .fillMaxWidth(),
+
+            onClick = {
+                //navController.navigate(route = Screen.CreateGame.route)
+                Log.d("CreateGameButton", "301: ${viewModel.is301Selected}, 501: ${viewModel.is501Selected}")
+            }) {
+            Text(
+                text = "Create Game",
+                fontSize = 24.sp
+            )
         }
     }
 }
 
 @Composable
-fun GameTypeBox() {
-    val is301Selected = remember { mutableStateOf(true) }
-    val is501Selected = remember { mutableStateOf(false) }
-    val buttonMap: Map<String, MutableState<Boolean>> = mapOf(
-        "301" to is301Selected,
-        "501" to is501Selected
-    )
+fun GameTypeBox(viewModel: CreateGameViewModel) {
+    // Using the states from the CreateGameViewModel
+    val is301Selected = viewModel.is301Selected.value
+    val is501Selected = viewModel.is501Selected.value
 
     Box(
         modifier = Modifier
@@ -108,24 +134,19 @@ fun GameTypeBox() {
                 verticalAlignment = Alignment.Bottom
             ) {
 
-                CustomButton("301", true, buttonMap)
+                CustomButton("301", true, is301Selected) { viewModel.selectGameType("301") }
                 Spacer(modifier = Modifier.width(32.dp))
-                CustomButton("501", true, buttonMap)
+                CustomButton("501", true, is501Selected) { viewModel.selectGameType("501") }
             }
         }
     }
 }
 
 @Composable
-fun BestOfBox() {
-    val isBo1Selected = remember { mutableStateOf(true) }
-    val isBo3Selected = remember { mutableStateOf(false) }
-    val isBo5Selected = remember { mutableStateOf(false) }
-    val buttonMap: Map<String, MutableState<Boolean>> = mapOf(
-        "Bo1" to isBo1Selected,
-        "Bo3" to isBo3Selected,
-        "Bo5" to isBo5Selected
-    )
+fun BestOfBox(viewModel: CreateGameViewModel) {
+    val isBo1Selected = viewModel.isBo1Selected.value
+    val isBo3Selected = viewModel.isBo3Selected.value
+    val isBo5Selected = viewModel.isBo5Selected.value
 
     Box(
         modifier = Modifier
@@ -150,33 +171,30 @@ fun BestOfBox() {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
-                CustomButton(text = "Bo1", false, buttonMap = buttonMap)
+                CustomButton(text = "Bo1", false, isBo1Selected) { viewModel.selectBestOf("Bo1") }
                 Spacer(modifier = Modifier.width(18.dp))
-                CustomButton(text = "Bo3", false, buttonMap = buttonMap)
+                CustomButton(text = "Bo3", false, isBo3Selected) { viewModel.selectBestOf("Bo3") }
                 Spacer(modifier = Modifier.width(18.dp))
-                CustomButton(text = "Bo5", false, buttonMap = buttonMap)
+                CustomButton(text = "Bo5", false, isBo5Selected) { viewModel.selectBestOf("Bo5") }
             }
         }
     }
 }
 
 @Composable
-fun ChoosePlayersBox() {
-    val isPlayerOneSelected = remember { mutableStateOf(true) }
-    val isPlayerTwoSelected = remember { mutableStateOf(false) }
-    val buttonMap: Map<String, MutableState<Boolean>> = mapOf(
-        "1 Player" to isPlayerOneSelected,
-        "2 Players" to isPlayerTwoSelected
-    )
+fun ChoosePlayersBox(viewModel: CreateGameViewModel) {
+    val isPlayerOneSelected = viewModel.isPlayerOneSelected.value
+    val isPlayerTwoSelected = viewModel.isPlayerTwoSelected.value
+
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(18.dp))
             .width(300.dp)
-            .height(120.dp)
+            .fillMaxHeight()
             .background(Color.DarkGray)
 
     ) {
-        Column() {
+        Column {
             Text(
                 modifier = Modifier
                     .padding(12.dp),
@@ -191,19 +209,49 @@ fun ChoosePlayersBox() {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
-                CustomButton(text = "1 Player", true, buttonMap = buttonMap)
-                Spacer(modifier = Modifier.width(32.dp)) // Add spacing here
-                CustomButton(text = "2 Players", true, buttonMap = buttonMap)
+                CustomButton(text = "1 Player", true, isPlayerOneSelected) { viewModel.selectPlayers("1 Player") }
+                Spacer(modifier = Modifier.width(32.dp))
+                CustomButton(text = "2 Players", true, isPlayerTwoSelected) { viewModel.selectPlayers("2 Players") }
+            }
+            CustomTextField("Player 1")
+            if (isPlayerTwoSelected) {
+                CustomTextField("Player 2")
             }
         }
     }
+}
+
+// Pretty much the same as in SignInScreen, could use the same composable?
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomTextField(player: String) {
+    val textState = remember { mutableStateOf("") }
+
+    OutlinedTextField (
+        value = textState.value,
+        onValueChange = {
+            textState.value = it
+        },
+        modifier = Modifier
+            .padding(5.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = Color.White,
+            unfocusedIndicatorColor = Color.Black,
+            focusedIndicatorColor = Color.Yellow,
+            containerColor = Color.Black
+
+            ),
+        shape = RoundedCornerShape(percent = 60),
+        placeholder = { Text(text = "$player name...")}
+    )
 }
 
 @Composable
 fun CustomButton(
     text: String,
     bigButton: Boolean,
-    buttonMap: Map<String, MutableState<Boolean>>
+    isSelected: Boolean,
+    onSelected: () -> Unit
 ) {
     OutlinedButton(
         modifier = Modifier
@@ -212,13 +260,8 @@ fun CustomButton(
                 width = if (bigButton) 115.dp else 80.dp, // Changing based on "bigButton"
                 height = 40.dp
             ),
-        onClick = {
-            buttonMap.forEach { (buttonText, buttonBool) ->
-                buttonBool.value = (text == buttonText)
-            }
-
-        },
-        border = if (buttonMap[text]?.value == true) {
+        onClick = onSelected,
+        border = if (isSelected) {
             BorderStroke(2.dp, Color.Yellow)
         } else {
             BorderStroke(0.dp, Color.Transparent)
@@ -229,6 +272,7 @@ fun CustomButton(
         Text(text = text, color = Color.White)
     }
 }
+
 
 //@Composable
 //@Preview(showBackground = true)

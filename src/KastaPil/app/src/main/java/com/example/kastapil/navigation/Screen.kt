@@ -1,4 +1,4 @@
-package com.example.kastapil
+package com.example.kastapil.navigation
 
 sealed class Screen (val route: String) {
     object SignIn: Screen(route = "sign_in_screen")

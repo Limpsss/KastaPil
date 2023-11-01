@@ -1,12 +1,14 @@
-package com.example.kastapil
+package com.example.kastapil.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import com.example.kastapil.ui.screens.CreateGameScreen
+import com.example.kastapil.ui.screens.HomeScreen
+import com.example.kastapil.ui.screens.SignInScreen
+import com.example.kastapil.viewModels.CreateGameViewModel
 
 @Composable
 fun SetUpNavHost(
@@ -33,7 +35,8 @@ fun SetUpNavHost(
         composable(
             route = Screen.CreateGame.route
         ){
-            CreateGameScreen(navController)
+            val createGameViewModel: CreateGameViewModel = viewModel()
+            CreateGameScreen(navController, createGameViewModel)
         }
     }
 }
