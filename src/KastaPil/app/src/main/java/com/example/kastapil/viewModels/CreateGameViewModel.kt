@@ -16,8 +16,8 @@ class CreateGameViewModel : ViewModel() {
     val isPlayerOneSelected = mutableStateOf(true)
     val isPlayerTwoSelected = mutableStateOf(false)
 
-    val playerOneName = mutableStateOf("Player 1")
-    val playerTwoName = mutableStateOf("Player 2")
+    val playerOneName = mutableStateOf("")
+    val playerTwoName = mutableStateOf("")
 
     fun selectGameType(type: String) {
         when (type) {
@@ -65,21 +65,54 @@ class CreateGameViewModel : ViewModel() {
         }
     }
 
+    fun onNameOneChanged(newString: String) {
+        playerOneName.value = newString
+    }
+
+    fun onNameTwoChanged(newString: String) {
+        playerTwoName.value = newString
+    }
+
+    // Validating the player names
+    fun validateNames(): Boolean {
+        if (isPlayerTwoSelected.value) {
+            if (playerOneName.value.isNotEmpty() &&
+                playerOneName.value.length <= 10 &&
+                playerTwoName.value.isNotEmpty() &&
+                playerTwoName.value.length <= 10)
+                return true
+        }
+        else {
+            if (playerOneName.value.isNotEmpty() &&
+                playerOneName.value.length <= 10)
+                return true
+        }
+        return false
+    }
+
     fun createGame(): MutableMap<String, String> {
         val gameInfo = mutableMapOf<String, String>()
-        gameInfo["gameType"] = if (is301Selected.value) "301" else "501"
+        gameInfo["gameType"] = when {
+            is301Selected.value -> "301"
+            is501Selected.value -> "501"
+            else -> "ERROR"
+        }
 
         gameInfo["bestOf"] = when {
             isBo1Selected.value -> "bestOf1"
             isBo3Selected.value -> "bestOf3"
             isBo5Selected.value -> "bestOf5"
-            else -> "bestOf1"
+            else -> "ERROR"
         }
 
-        gameInfo["players"] = if (isPlayerOneSelected.value) "onePlayer" else "twoPlayers"
+        gameInfo["playerAmount"] = when {
+            isPlayerOneSelected.value -> "onePlayer"
+            isPlayerTwoSelected.value -> "twoPlayers"
+            else -> "ERROR"
+        }
 
         gameInfo["playerOneName"] = playerOneName.value
-        gameInfo["playerTwoName"] = if (isPlayerTwoSelected.value) playerTwoName.value else ""
+        gameInfo["playerTwoName"] = playerTwoName.value
 
         //Log.d("test", "$gameInfo")
         return gameInfo

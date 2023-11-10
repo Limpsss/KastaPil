@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,9 +36,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
@@ -45,15 +51,22 @@ import androidx.navigation.NavController
 import com.example.kastapil.navigation.Screen
 import com.example.kastapil.viewModels.CreateGameViewModel
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CreateGameScreen(navController: NavController, viewModel: CreateGameViewModel) {
     val scrollState = rememberScrollState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val interactionSource = remember { MutableInteractionSource() }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
             .verticalScroll(scrollState)
+            .clickable(
+                indication = null,
+                interactionSource = interactionSource
+            ) { keyboardController?.hide() }
 
     ) {
         Text(
@@ -84,6 +97,7 @@ fun CreateGameScreen(navController: NavController, viewModel: CreateGameViewMode
             ChoosePlayersBox(viewModel)
         }
 
+        // CREATE GAME BUTTON
         Button(
             colors = ButtonDefaults.buttonColors(Color.LightGray),
             modifier = Modifier
@@ -93,8 +107,14 @@ fun CreateGameScreen(navController: NavController, viewModel: CreateGameViewMode
                 .fillMaxWidth(),
 
             onClick = {
-                val gameInfo = viewModel.createGame()
-                navController.navigate(route = Screen.inGame.passGameInfo(gameInfo))
+                if (viewModel.validateNames()) {
+                    val gameInfo = viewModel.createGame()
+                    navController.navigate(route = Screen.inGame.passGameInfo(gameInfo))
+                }
+                else {
+                    // Error handling or smth
+                    Log.d("errorM", "THIS IS A VERY IMPORTANT ERROR MESSAGE")
+                }
 
             }) {
             Text(
@@ -186,6 +206,8 @@ fun BestOfBox(viewModel: CreateGameViewModel) {
 fun ChoosePlayersBox(viewModel: CreateGameViewModel) {
     val isPlayerOneSelected = viewModel.isPlayerOneSelected.value
     val isPlayerTwoSelected = viewModel.isPlayerTwoSelected.value
+    val playerOneName = viewModel.playerOneName
+    val playerTwoName = viewModel.playerTwoName
 
     Box(
         modifier = Modifier
@@ -214,28 +236,28 @@ fun ChoosePlayersBox(viewModel: CreateGameViewModel) {
                 Spacer(modifier = Modifier.width(32.dp))
                 CustomButton(text = "2 Players", true, isPlayerTwoSelected) { viewModel.selectPlayers("2 Players") }
             }
-            CustomTextField("Player 1")
+            CustomTextField("Player 1", viewModel)
             if (isPlayerTwoSelected) {
-                CustomTextField("Player 2")
+                CustomTextField("Player 2", viewModel)
             }
         }
     }
 }
 
-// Pretty much the same as in SignInScreen, could use the same composable?
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun CustomTextField(player: String) {
-    val textState = remember { mutableStateOf("") }
+fun CustomTextField(player: String, viewModel: CreateGameViewModel) {
+    val textState = if (player == "Player 1") viewModel.playerOneName else viewModel.playerTwoName
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     OutlinedTextField (
         value = textState.value,
         onValueChange = {
-            textState.value = it
-        },
+                        if (player == "Player 1") viewModel.onNameOneChanged(it)
+                        else viewModel.onNameTwoChanged(it) },
         modifier = Modifier
             .padding(5.dp),
-        colors = TextFieldDefaults.textFieldColors(
+            colors = TextFieldDefaults.textFieldColors(
             textColor = Color.White,
             unfocusedIndicatorColor = Color.Black,
             focusedIndicatorColor = Color.Yellow,
@@ -243,7 +265,14 @@ fun CustomTextField(player: String) {
 
             ),
         shape = RoundedCornerShape(percent = 60),
-        placeholder = { Text(text = "$player name...")}
+        placeholder = { Text(text = "$player name...")},
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Done // Set the IME action to Done or any other appropriate action
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                keyboardController?.hide() // Hide the keyboard
+            })
     )
 }
 
