@@ -93,8 +93,9 @@ fun CreateGameScreen(navController: NavController, viewModel: CreateGameViewMode
                 .fillMaxWidth(),
 
             onClick = {
-                //navController.navigate(route = Screen.CreateGame.route)
-                Log.d("CreateGameButton", "301: ${viewModel.is301Selected}, 501: ${viewModel.is501Selected}")
+                val gameInfo = viewModel.createGame()
+                navController.navigate(route = Screen.inGame.passGameInfo(gameInfo))
+
             }) {
             Text(
                 text = "Create Game",

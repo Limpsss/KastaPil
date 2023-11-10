@@ -1,11 +1,11 @@
 package com.example.kastapil.viewModels
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import kotlin.math.log
 
 class CreateGameViewModel : ViewModel() {
-    val gameInfo = mutableStateOf("map med gametype, best of, player names å liknande")
-
     val is301Selected = mutableStateOf(true)
     val is501Selected = mutableStateOf(false)
 
@@ -16,7 +16,6 @@ class CreateGameViewModel : ViewModel() {
     val isPlayerOneSelected = mutableStateOf(true)
     val isPlayerTwoSelected = mutableStateOf(false)
 
-    val twoPlayers = mutableStateOf(false)
     val playerOneName = mutableStateOf("Player 1")
     val playerTwoName = mutableStateOf("Player 2")
 
@@ -64,5 +63,25 @@ class CreateGameViewModel : ViewModel() {
                 isPlayerTwoSelected.value = true
             }
         }
+    }
+
+    fun createGame(): MutableMap<String, String> {
+        val gameInfo = mutableMapOf<String, String>()
+        gameInfo["gameType"] = if (is301Selected.value) "301" else "501"
+
+        gameInfo["bestOf"] = when {
+            isBo1Selected.value -> "bestOf1"
+            isBo3Selected.value -> "bestOf3"
+            isBo5Selected.value -> "bestOf5"
+            else -> "bestOf1"
+        }
+
+        gameInfo["players"] = if (isPlayerOneSelected.value) "onePlayer" else "twoPlayers"
+
+        gameInfo["playerOneName"] = playerOneName.value
+        gameInfo["playerTwoName"] = if (isPlayerTwoSelected.value) playerTwoName.value else ""
+
+        //Log.d("test", "$gameInfo")
+        return gameInfo
     }
 }
