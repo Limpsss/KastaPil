@@ -6,25 +6,28 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.kastapil.models.GoogleAuthClient
 import com.example.kastapil.navigation.SetUpNavHost
 import com.example.kastapil.ui.theme.KastaPilTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.android.gms.auth.api.identity.Identity
 
 class MainActivity : ComponentActivity() {
 
-    lateinit var navController: NavHostController
+    private lateinit var navController: NavHostController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             KastaPilTheme {
-
                 SetStatusBarColor(color = Color.Black)
 
                 navController = rememberNavController()
-                SetUpNavHost(navController = navController)
+                SetUpNavHost(navController, lifecycleScope, applicationContext)
                 
             }
         }

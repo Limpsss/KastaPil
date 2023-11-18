@@ -1,5 +1,10 @@
 package com.example.kastapil.ui.screens
 
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,75 +18,100 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.kastapil.navigation.Screen
+import com.example.kastapil.viewModels.SignInState
+import com.example.kastapil.viewModels.SignInViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignInScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: SignInViewModel
 ) {
+
+    val context = LocalContext.current
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+
+            if (result.resultCode == ComponentActivity.RESULT_OK) {
+                viewModel.handleSignInResult(result.data)
+            }
+        }
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+        Button(onClick = {
+            viewModel.viewModelScope.launch {
+                val signInIntentSender = viewModel.initiateSignIn()
+                launcher.launch(
+                    IntentSenderRequest.Builder(
+                        signInIntentSender ?: return@launch
+                    ).build())
+            }
+        }) {
+            Text(text = "Sign in")
+        }
+    }
 
-            TextFieldView(false)
-
-            TextFieldView(true)
-
-            Button(
-                onClick = {
-                    navController.navigate(
-                        route = Screen.Home.route
-                    )
-                },
-            ) {
-                Text(text = "Don't click here")
+    LaunchedEffect(key1 = Unit) {
+        if (viewModel.getSignedInUser()) {
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.Home.route) {
+                    inclusive = true
+                }
             }
         }
     }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TextFieldView(isPassword: Boolean) {
-    val textState = remember { mutableStateOf("") }
-    val placeholder = if (isPassword) "Password" else "Username"
-    val label = if(isPassword) "Password" else "Username"
+    LaunchedEffect(key1 = state.isSignInSuccessful) {
+        if (state.isSignInSuccessful) {
+            Toast.makeText(
+                context,
+                "Sign in successful",
+                Toast.LENGTH_LONG
+            ).show()
 
-    OutlinedTextField (
-        value = textState.value,
-        onValueChange = {
-            textState.value = it
-        },
-        modifier = Modifier.padding(5.dp),
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = Color.White,
-            unfocusedIndicatorColor = Color.Black,
-            focusedIndicatorColor = Color.Blue,
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.Home.route) {
+                    inclusive = true
+                }
+            }
+            viewModel.resetState()
+        }
+    }
 
-        ),
-        shape = RoundedCornerShape(percent = 20),
-        placeholder = { Text(text = placeholder)},
-        label = {Text(text = label)},
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None
-    )
+    LaunchedEffect(key1 = state.signInError) {
+        state.signInError?.let { error ->
+            Toast.makeText(
+                context,
+                error,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 }
 
 //@Composable

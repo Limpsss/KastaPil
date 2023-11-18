@@ -53,7 +53,10 @@ import com.example.kastapil.viewModels.CreateGameViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CreateGameScreen(navController: NavController, viewModel: CreateGameViewModel) {
+fun CreateGameScreen(
+    navController: NavController,
+    viewModel: CreateGameViewModel
+) {
     val scrollState = rememberScrollState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val interactionSource = remember { MutableInteractionSource() }
