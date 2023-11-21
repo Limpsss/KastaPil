@@ -16,7 +16,7 @@ class CreateGameViewModel : ViewModel() {
     val isPlayerOneSelected = mutableStateOf(true)
     val isPlayerTwoSelected = mutableStateOf(false)
 
-    val playerOneName = mutableStateOf("")
+    val playerOneName = mutableStateOf("Limps")
     val playerTwoName = mutableStateOf("")
 
     fun selectGameType(type: String) {
