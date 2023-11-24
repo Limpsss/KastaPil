@@ -50,6 +50,8 @@ import com.example.kastapil.R
 import com.example.kastapil.navigation.Screen
 import com.example.kastapil.viewModels.CreateGameViewModel
 import com.example.kastapil.viewModels.InGameViewModel
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 @Composable
 fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: InGameViewModel) {
@@ -94,10 +96,13 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
                         fontSize = 32.sp
                     )
                 }
+
+                Text(
+                    text = "Current score: " + viewModel.playerOneCurrScore.value.toString(),
+                    fontSize = 32.sp
+                )
             }
 
-
-            var boardSize = remember { mutableStateOf(IntSize(0,0)) }
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -121,7 +126,8 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
                         .align(Alignment.Center)
                         .size(270.dp),
                     colorOne = Color.Red,
-                    colorTwo = Color(0xFF00a000))
+                    colorTwo = Color(0xFF00a000),
+                    viewModel)
 
                 // NORMAL point outer ring (Black, White)
                 DartSegments(
@@ -129,7 +135,8 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
                     .align(Alignment.Center)
                     .size(255.dp),
                     colorOne = Color.Black,
-                    colorTwo = Color(0xFFe7e4c7))
+                    colorTwo = Color(0xFFe7e4c7),
+                    viewModel)
 //                    colorTwo = Color(0xFFcfd4b6))
 
                 // TRIPLE point ring (Red, Green)
@@ -138,7 +145,8 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
                         .align(Alignment.Center)
                         .size(165.dp),
                     colorOne = Color.Red,
-                    colorTwo = Color(0xFF00a000))
+                    colorTwo = Color(0xFF00a000),
+                    viewModel)
 
                 // NORMAL point outer ring (Black, White)
                 DartSegments(
@@ -146,7 +154,8 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
                         .align(Alignment.Center)
                         .size(150.dp),
                     colorOne = Color.Black,
-                    colorTwo = Color(0xFFe7e4c7))
+                    colorTwo = Color(0xFFe7e4c7),
+                    viewModel)
 
                 // Outer bullseye ring
                 Canvas(
@@ -181,8 +190,42 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
 }
 
 @Composable
-fun DartSegments(modifier: Modifier = Modifier, colorOne: Color, colorTwo: Color) {
-    Canvas(modifier = modifier){
+fun DartSegments(modifier: Modifier = Modifier, colorOne: Color, colorTwo: Color, viewModel: InGameViewModel) {
+    val startAngle = -99f
+    // sweepAngle - size of arch in degrees, each slice is 360°/20 = 18°
+    val sweepAngle = 18f
+
+    Canvas(
+        modifier = modifier
+            .pointerInput(Unit) {
+                detectTapGestures { tapOffset ->
+                    // Center of the canvas
+                    val center = Offset(size.width.toFloat() / 2, size.height.toFloat() / 2)
+                    // Calculate the x and y differences between the tap point and the center
+                    val dx = tapOffset.x - center.x
+                    val dy = tapOffset.y - center.y
+
+                    // Calculate the distance from the tap point to the center
+                    // Pythagoras sats = sqrt(dx^2 + dy^2)
+                    val distance = sqrt(dx * dx + dy * dy)
+
+                    // Convert the x and y differences to an angle in degrees
+                    val angleInDegrees = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat() % 360
+
+                    // Determine which segment the tap is in
+                    // The formula calculates how many segments away from the start angle the tap occurred
+                    val tappedSegment = ((angleInDegrees - startAngle) / sweepAngle).toInt()
+
+                    // Adjust segment index if it's negative (this can happen if startAngle is negative)
+                    val segmentIndex = if (tappedSegment < 0) tappedSegment + 20 else tappedSegment
+
+                    // Check if the tap is within the radius of the dartboard
+                    // If yes, it means the tap is inside the circle
+                    if (distance <= minOf(size.width, size.height) / 2) {
+                        viewModel.addScore(segmentIndex, 1)
+                    }
+                }
+            }){
         drawCircle(color = Color.Black)
 
         val width = size.width
@@ -190,9 +233,7 @@ fun DartSegments(modifier: Modifier = Modifier, colorOne: Color, colorTwo: Color
         val radius = minOf(width, height) / 2
         val topLeft = Offset((width - 2 * radius) / 2, (height - 2 * radius) / 2)
         val size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2)
-        val startAngle = -99f
-        // sweepAngle - size of arch in degrees, each slice is 360°/20 = 18°
-        val sweepAngle = 18f
+
 
         var segmentColor: Color
         for (i in 0..19) {
