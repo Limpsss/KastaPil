@@ -1,58 +1,47 @@
+@file:Suppress("NAME_SHADOWING")
+
 package com.example.kastapil.ui.screens
 
-import android.graphics.Paint.Style
-import android.util.Log
-import android.util.Size
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.kastapil.R
-import com.example.kastapil.navigation.Screen
-import com.example.kastapil.viewModels.CreateGameViewModel
 import com.example.kastapil.viewModels.InGameViewModel
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: InGameViewModel) {
     // gameIfo =
@@ -109,15 +98,30 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
                     .fillMaxSize()
                     .background(color = Color.DarkGray)) {
 
-                // Background dartboard image for numbers
-                val painter2 = painterResource(id = R.drawable.dart2)
+                var scale = remember { mutableStateOf(1f) }
+                var canvasOffset = remember { mutableStateOf(Offset.Zero) }
+
+
+                // How i will draw:
+//                var drawingPoints by remember { mutableStateOf(listOf<Offset>()) }
+//                            }) { offset ->
+//                            drawingPoints = drawingPoints + offset
+//                        }
+//                    })
+
                 Image(
-                    painter = painter2,
+                    painter = painterResource(id = R.drawable.dart2),
                     contentDescription = "dartboard",
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.Center)
                         .size(355.dp)
+                        .graphicsLayer(
+                            scaleX = scale.value,
+                            scaleY = scale.value,
+                            translationX = canvasOffset.value.x,
+                            translationY = canvasOffset.value.y
+                        )
                 )
 
                 // DOUBLE point ring (Red, Green)
@@ -127,17 +131,20 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
                         .size(270.dp),
                     colorOne = Color.Red,
                     colorTwo = Color(0xFF00a000),
+                    scale,
+                    canvasOffset,
                     viewModel)
 
                 // NORMAL point outer ring (Black, White)
                 DartSegments(
                     modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(255.dp),
+                        .align(Alignment.Center)
+                        .size(255.dp),
                     colorOne = Color.Black,
                     colorTwo = Color(0xFFe7e4c7),
+                    scale,
+                    canvasOffset,
                     viewModel)
-//                    colorTwo = Color(0xFFcfd4b6))
 
                 // TRIPLE point ring (Red, Green)
                 DartSegments(
@@ -146,6 +153,8 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
                         .size(165.dp),
                     colorOne = Color.Red,
                     colorTwo = Color(0xFF00a000),
+                    scale,
+                    canvasOffset,
                     viewModel)
 
                 // NORMAL point outer ring (Black, White)
@@ -155,77 +164,74 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
                         .size(150.dp),
                     colorOne = Color.Black,
                     colorTwo = Color(0xFFe7e4c7),
+                    scale,
+                    canvasOffset,
                     viewModel)
 
                 // Outer bullseye ring
-                Canvas(
+                BullseyeRing(
                     modifier = Modifier
                         .size(25.dp)
-                        .align(Alignment.Center)) {
-                    // Green circle
-                    drawCircle(color = Color(0xFF00a000))
-
-                    // White border:
-                    drawCircle(
-                        color = Color.White,
-                        style = Stroke(3f))
-                }
+                        .align(Alignment.Center),
+                    color = Color(0xFF00a000),
+                    scale = scale,
+                    canvasOffset = canvasOffset
+                )
 
                 // Inner bullseye ring
-                Canvas(
+                BullseyeRing(
                     modifier = Modifier
                         .size(10.dp)
-                        .align(Alignment.Center)) {
-                    // Red circle:
-                    drawCircle(color = Color.Red)
-
-                    // White border:
-                    drawCircle(
-                        color = Color.White,
-                        style = Stroke(3f))
-                }
+                        .align(Alignment.Center),
+                    color = Color.Red,
+                    scale = scale,
+                    canvasOffset = canvasOffset
+                )
             }
         }
     }
 }
 
 @Composable
-fun DartSegments(modifier: Modifier = Modifier, colorOne: Color, colorTwo: Color, viewModel: InGameViewModel) {
+fun DartSegments(
+    modifier: Modifier = Modifier,
+    colorOne: Color,
+    colorTwo: Color,
+    scale: MutableState<Float>,
+    canvasOffset: MutableState<Offset>,
+    viewModel: InGameViewModel) {
     val startAngle = -99f
     // sweepAngle - size of arch in degrees, each slice is 360°/20 = 18°
     val sweepAngle = 18f
 
     Canvas(
         modifier = modifier
+            .graphicsLayer(
+                scaleX = scale.value,
+                scaleY = scale.value,
+                translationX = canvasOffset.value.x,
+                translationY = canvasOffset.value.y
+            )
             .pointerInput(Unit) {
-                detectTapGestures { tapOffset ->
-                    // Center of the canvas
-                    val center = Offset(size.width.toFloat() / 2, size.height.toFloat() / 2)
-                    // Calculate the x and y differences between the tap point and the center
-                    val dx = tapOffset.x - center.x
-                    val dy = tapOffset.y - center.y
+                detectTapGestures(
+                    onPress = { touchPoint ->
+                        scale.value = 5f
+                        val centerX = size.width / 2
+                        val centerY = size.height / 2
 
-                    // Calculate the distance from the tap point to the center
-                    // Pythagoras sats = sqrt(dx^2 + dy^2)
-                    val distance = sqrt(dx * dx + dy * dy)
+                        // Calculate the offset to center the zoom on the touch point
+                        val deltaX = (touchPoint.x - centerX) * (1 - scale.value)
+                        val deltaY = (touchPoint.y - centerY) * (1 - scale.value)
+                        canvasOffset.value = Offset(deltaX, deltaY)
 
-                    // Convert the x and y differences to an angle in degrees
-                    val angleInDegrees = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat() % 360
+                        tryAwaitRelease()
 
-                    // Determine which segment the tap is in
-                    // The formula calculates how many segments away from the start angle the tap occurred
-                    val tappedSegment = ((angleInDegrees - startAngle) / sweepAngle).toInt()
-
-                    // Adjust segment index if it's negative (this can happen if startAngle is negative)
-                    val segmentIndex = if (tappedSegment < 0) tappedSegment + 20 else tappedSegment
-
-                    // Check if the tap is within the radius of the dartboard
-                    // If yes, it means the tap is inside the circle
-                    if (distance <= minOf(size.width, size.height) / 2) {
-                        viewModel.addScore(segmentIndex, 1)
-                    }
-                }
-            }){
+                        // Reset scale and offset upon release
+                        scale.value = 1f
+                        canvasOffset.value = Offset.Zero
+                    })
+            })
+    {
         drawCircle(color = Color.Black)
 
         val width = size.width
@@ -261,9 +267,50 @@ fun DartSegments(modifier: Modifier = Modifier, colorOne: Color, colorTwo: Color
                 topLeft = topLeft,
                 size = size,
                 useCenter = true,
-                style = Stroke(width = 3f)
+                style = Stroke(width = 2f)
             )
         }
+    }
+}
+
+@Composable
+fun BullseyeRing(modifier: Modifier,
+                 color: Color,
+                 scale: MutableState<Float>,
+                 canvasOffset: MutableState<Offset>,) {
+    Canvas(
+        modifier = modifier
+            .graphicsLayer(
+                scaleX = scale.value,
+                scaleY = scale.value,
+                translationX = canvasOffset.value.x,
+                translationY = canvasOffset.value.y
+            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { touchPoint ->
+                        scale.value = 5f
+                        val centerX = size.width / 2
+                        val centerY = size.height / 2
+
+                        // Calculate the offset to center the zoom on the touch point
+                        val deltaX = (touchPoint.x - centerX) * (1 - scale.value)
+                        val deltaY = (touchPoint.y - centerY) * (1 - scale.value)
+                        canvasOffset.value = Offset(deltaX, deltaY)
+
+                        tryAwaitRelease()
+                        // Reset scale and offset upon release
+                        scale.value = 1f
+                        canvasOffset.value = Offset.Zero
+                    })
+            })
+    {
+        drawCircle(color = color)
+
+        // White border:
+        drawCircle(
+            color = Color.White,
+            style = Stroke(2f))
     }
 }
 
