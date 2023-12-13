@@ -9,7 +9,6 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.kastapil"
         minSdk = 33
         targetSdk = 34
         versionCode = 1
