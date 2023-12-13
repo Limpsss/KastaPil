@@ -264,6 +264,7 @@ fun DartSegments(
                             theta += 2 * PI
                         }
 
+
                         // Determine which sector is pressed
                         val sector_angle = 360 / 20
                         touchedArcIndex = ceil(Math.toDegrees(theta) / sector_angle)
