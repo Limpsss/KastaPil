@@ -132,85 +132,93 @@ fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: In
 //                        }
 //                    })
 
-                Image(
-                    painter = painterResource(id = R.drawable.dart2),
-                    contentDescription = "dartboard",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .size(355.dp)
-                        .graphicsLayer(
-                            scaleX = scale.value,
-                            scaleY = scale.value,
-                            translationX = canvasOffset.value.x,
-                            translationY = canvasOffset.value.y
-                        )
-                )
+//                Image(
+//                    painter = painterResource(id = R.drawable.dart2),
+//                    contentDescription = "dartboard",
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .align(Alignment.Center)
+//                        .size(355.dp)
+//                        .graphicsLayer(
+//                            scaleX = scale.value,
+//                            scaleY = scale.value,
+//                            translationX = canvasOffset.value.x,
+//                            translationY = canvasOffset.value.y
+//                        )
+//                )
+//
+//                // DOUBLE point ring (Red, Green)
+//                DartSegments(
+//                    modifier = Modifier
+//                        .align(Alignment.Center)
+//                        .size(270.dp),
+//                    colorOne = Color.Red,
+//                    colorTwo = Color(0xFF00a000),
+//                    scale,
+//                    canvasOffset,
+//                    viewModel)
+//
+//                // NORMAL point outer ring (Black, White)
+//                DartSegments(
+//                    modifier = Modifier
+//                        .align(Alignment.Center)
+//                        .size(255.dp),
+//                    colorOne = Color.Black,
+//                    colorTwo = Color(0xFFe7e4c7),
+//                    scale,
+//                    canvasOffset,
+//                    viewModel)
+//
+//
+//                // TRIPLE point ring (Red, Green)
+//                DartSegments(
+//                    modifier = Modifier
+//                        .align(Alignment.Center)
+//                        .size(165.dp),
+//                    colorOne = Color.Red,
+//                    colorTwo = Color(0xFF00a000),
+//                    scale,
+//                    canvasOffset,
+//                    viewModel)
+//
+//                // NORMAL point outer ring (Black, White)
+//                DartSegments(
+//                    modifier = Modifier
+//                        .align(Alignment.Center)
+//                        .size(150.dp),
+//                    colorOne = Color.Black,
+//                    colorTwo = Color(0xFFe7e4c7),
+//                    scale,
+//                    canvasOffset,
+//                    viewModel)
+//
+//                // Outer bullseye ring
+//                BullseyeRing(
+//                    modifier = Modifier
+//                        .size(25.dp)
+//                        .align(Alignment.Center),
+//                    color = Color(0xFF00a000),
+//                    scale = scale,
+//                    canvasOffset = canvasOffset
+//                )
+//
+//                // Inner bullseye ring
+//                BullseyeRing(
+//                    modifier = Modifier
+//                        .size(10.dp)
+//                        .align(Alignment.Center),
+//                    color = Color.Red,
+//                    scale = scale,
+//                    canvasOffset = canvasOffset
+//                )
 
-                // DOUBLE point ring (Red, Green)
-                DartSegments(
+                TestSegments(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .size(270.dp),
-                    colorOne = Color.Red,
-                    colorTwo = Color(0xFF00a000),
                     scale,
                     canvasOffset,
                     viewModel)
-
-                // NORMAL point outer ring (Black, White)
-                DartSegments(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(255.dp),
-                    colorOne = Color.Black,
-                    colorTwo = Color(0xFFe7e4c7),
-                    scale,
-                    canvasOffset,
-                    viewModel)
-
-                // TRIPLE point ring (Red, Green)
-                DartSegments(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(165.dp),
-                    colorOne = Color.Red,
-                    colorTwo = Color(0xFF00a000),
-                    scale,
-                    canvasOffset,
-                    viewModel)
-
-                // NORMAL point outer ring (Black, White)
-                DartSegments(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(150.dp),
-                    colorOne = Color.Black,
-                    colorTwo = Color(0xFFe7e4c7),
-                    scale,
-                    canvasOffset,
-                    viewModel)
-
-                // Outer bullseye ring
-                BullseyeRing(
-                    modifier = Modifier
-                        .size(25.dp)
-                        .align(Alignment.Center),
-                    color = Color(0xFF00a000),
-                    scale = scale,
-                    canvasOffset = canvasOffset
-                )
-
-                // Inner bullseye ring
-                BullseyeRing(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .align(Alignment.Center),
-                    color = Color.Red,
-                    scale = scale,
-                    canvasOffset = canvasOffset
-                )
-
             }
         }
     }
@@ -231,10 +239,7 @@ fun DartSegments(
 
     // on touch arc
     var touchedArcIndex by remember { mutableStateOf(-1.0) }
-    val numberOfArcs = 20
-    val arcColors = List(numberOfArcs) { index ->
-        if (index == touchedArcIndex.toInt()) Color.Red else Color.Blue
-    }
+
 
     Canvas(
         modifier = modifier
@@ -250,34 +255,41 @@ fun DartSegments(
 
                     onPress = { touchPoint ->
                         Log.d("test", "SIZE: x: ${size.width}, y: ${size.height}")
-                        val center = Offset(size.width/2f, size.height/2f)
+                        val center = Offset(size.width / 2f, size.height / 2f)
 
-                        // Calculate Click Coordinates Relative to the Center
+                        // Calculate click coordinates relative to the center
                         val x_rel = touchPoint.x - center.x
                         val y_rel = center.y - touchPoint.y
 
-                        // Calculate the Angle of the Click
+                        // Calculate the angle of the click
                         var theta = (atan2(y_rel, x_rel)).toDouble()
 
-                        // Adjust the Angle for Negative Values
+                        // Adjust the angle for negative values
                         if (theta < 0) {
                             theta += 2 * PI
                         }
 
-
                         // Determine which sector is pressed
                         val sector_angle = 360 / 20
-                        touchedArcIndex = ceil(Math.toDegrees(theta) / sector_angle)
+                        val index = ceil((Math.toDegrees(theta) - 9) / sector_angle)
 
+
+                        // Check if the click is inside the circle
+                        val distance = sqrt(x_rel * x_rel + y_rel * y_rel)
+                        if (distance > 743 / 2) {
+                            Log.d("test", "CLICK IS OUTSIDE OF CIRCLE")
+                            touchedArcIndex = -1.0
+                        } else {
+                            touchedArcIndex = index
+                            if (touchedArcIndex == 20.0) {
+                                touchedArcIndex = 0.0
+                            }
+                        }
 
 
                         Log.d("test", "x: ${touchPoint.x}, y: ${touchPoint.y}")
                         Log.d("test", "THETA: ${theta}")
-                        Log.d("test", "Sector: ${touchedArcIndex}")
-
-
-
-
+                        Log.d("test", "Sector: ${touchedArcIndex.toInt()}")
 
 
                         // Initial touch point, start zooming
@@ -313,20 +325,21 @@ fun DartSegments(
         val height = size.height
         val radius = minOf(width, height) / 2
         val topLeft = Offset((width - 2 * radius) / 2, (height - 2 * radius) / 2)
-//        val size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2)
+
 
 
         var segmentColor: Color
         for (i in 0..19) {
-            if (i % 2 == 0) {
-                segmentColor = colorOne
-            } else {
-                segmentColor = colorTwo
+            when {
+                i == touchedArcIndex.toInt() -> segmentColor = Color.Yellow // Color for the selected arc
+                i % 2 == 0 -> segmentColor = colorOne // Regular color scheme
+                else -> segmentColor = colorTwo
             }
+
 
             // White and black color segments
             drawArc(
-                color = arcColors[i],
+                color = segmentColor,
                 startAngle = startAngle + i * 18,
                 sweepAngle = sweepAngle,
                 topLeft = topLeft,
@@ -349,6 +362,153 @@ fun DartSegments(
 }
 
 @Composable
+fun TestSegments(
+    modifier: Modifier = Modifier,
+    scale: MutableState<Float>,
+    canvasOffset: MutableState<Offset>,
+    viewModel: InGameViewModel) {
+    val startAngle = -99f
+    // sweepAngle - size of arch in degrees, each slice is 360°/20 = 18°
+    val sweepAngle = 18f
+
+    // on touch arc
+    var touchedArcIndex by remember { mutableStateOf(-1.0) }
+
+
+    Canvas(
+        modifier = modifier
+            .graphicsLayer(
+                scaleX = scale.value,
+                scaleY = scale.value,
+                translationX = canvasOffset.value.x,
+                translationY = canvasOffset.value.y
+            )
+            // Code that works on drag zoom
+            .pointerInput(Unit) {
+                detectTapGestures(
+
+                    onPress = { touchPoint ->
+                        Log.d("test", "SIZE: x: ${size.width}, y: ${size.height}")
+                        Log.d("test", "SIZE: ${size}")
+                        val center = Offset(size.width / 2f, size.height / 2f)
+
+                        // Calculate click coordinates relative to the center
+                        val x_rel = touchPoint.x - center.x
+                        val y_rel = center.y - touchPoint.y
+
+                        // Calculate the angle of the click
+                        var theta = (atan2(y_rel, x_rel)).toDouble()
+
+                        // Adjust the angle for negative values
+                        if (theta < 0) {
+                            theta += 2 * PI
+                        }
+
+                        // Determine which sector is pressed
+                        val sector_angle = 360 / 20
+                        val index = ceil((Math.toDegrees(theta) - 9) / sector_angle)
+
+
+                        // Check if the click is inside the circle
+                        val distance = sqrt(x_rel * x_rel + y_rel * y_rel)
+                        if (distance > 743 / 2) {
+                            Log.d("test", "CLICK IS OUTSIDE OF CIRCLE")
+                            touchedArcIndex = -1.0
+                        } else {
+                            touchedArcIndex = index
+                            if (touchedArcIndex == 20.0) {
+                                touchedArcIndex = 0.0
+                            }
+                        }
+
+
+                        Log.d("test", "x: ${touchPoint.x}, y: ${touchPoint.y}")
+                        Log.d("test", "THETA: ${theta}")
+                        Log.d("test", "Sector: ${touchedArcIndex.toInt()}")
+
+
+                        // Initial touch point, start zooming
+//                        scale.value = 5f
+
+                        // Calculate the initial offset to center the zoom on the touch point
+                        val deltaX = (touchPoint.x - center.x) * (1 - scale.value)
+                        val deltaY = (touchPoint.y - center.y) * (1 - scale.value)
+                        canvasOffset.value = Offset(deltaX, deltaY)
+                    },
+                )
+            }
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDrag = { change, dragAmount ->
+                        // Update the offset as the finger moves
+                        val newOffset = canvasOffset.value - dragAmount * 5f
+                        canvasOffset.value = newOffset
+                    },
+                    onDragEnd = {
+                        // Reset scale and offset upon release
+                        scale.value = 1f
+                        canvasOffset.value = Offset.Zero
+                    }
+                )
+            }
+    )
+
+    {
+
+        var segmentColor: Color
+        var colors: Array<Color>
+
+        var currSize = size
+
+        for (j in 1..4) {
+            if (j % 2 == 0) {
+                colors = arrayOf(Color.Red, Color(0xFF00a000))
+            }
+            else {
+                colors = arrayOf(Color.Black, Color(0xFFe7e4c7))
+            }
+
+            // Need to dynamically change so each circle in the for loop is smaller
+            val radius = currSize.width / 2
+            val center = Offset(currSize.width / 2, currSize.height / 2)
+
+            for (i in 0..19) {
+                when {
+                    i == touchedArcIndex.toInt() -> segmentColor =
+                        Color.Yellow // Color for the selected arc
+                    i % 2 == 0 -> segmentColor = colors[0] // Regular color scheme
+                    else -> segmentColor = colors[1]
+                }
+
+
+                // Segments as circle
+                drawArc(
+                    color = segmentColor,
+                    startAngle = startAngle + i * 18,
+                    sweepAngle = sweepAngle,
+                    topLeft = center - Offset(radius, radius),
+                    size = currSize,
+                    useCenter = true
+                )
+
+                // White borders around segments
+                drawArc(
+                    color = Color.White,
+                    startAngle = startAngle + i * 18,
+                    sweepAngle = sweepAngle,
+                    topLeft = center - Offset(radius, radius),
+                    size = currSize,
+                    useCenter = true,
+                    style = Stroke(width = 2f)
+                )
+            }
+            // Change current size to draw smaller circles
+            currSize = Size(currSize.width / 2, currSize.height / 2)
+        }
+    }
+}
+
+@Composable
 fun BullseyeRing(modifier: Modifier,
                  color: Color,
                  scale: MutableState<Float>,
@@ -365,7 +525,7 @@ fun BullseyeRing(modifier: Modifier,
                 detectTapGestures(
                     onPress = { touchPoint ->
                         scale.value = 5f
-                        val center = Offset(size.width/2f, size.height/2f)
+                        val center = Offset(size.width / 2f, size.height / 2f)
 
                         // Calculate the offset to center the zoom on the touch point
                         val deltaX = (touchPoint.x - center.x) * (1 - scale.value)
