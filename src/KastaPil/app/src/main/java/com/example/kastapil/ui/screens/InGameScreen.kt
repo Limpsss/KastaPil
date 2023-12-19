@@ -145,13 +145,11 @@ fun Dartboard(
     scale: MutableState<Float>,
     canvasOffset: MutableState<Offset>,
     viewModel: InGameViewModel) {
-    val startAngle = -99f
-    // sweepAngle - size of arch in degrees, each slice is 360°/20 = 18°
-    val sweepAngle = 18f
 
     // on touch arc
     var touchedArcIndex by remember { mutableStateOf(-1.0) }
-
+    var center by remember { mutableStateOf(Offset.Zero) }
+    var touchCoordinates by remember { mutableStateOf(Offset.Unspecified) }
 
     Canvas(
         modifier = modifier
@@ -166,46 +164,15 @@ fun Dartboard(
                 detectTapGestures(
 
                     onPress = { touchPoint ->
-                        Log.d("test", "SIZE: ${size}")
-                        val center = Offset(size.width / 2f, size.height / 2f)
+//                        val center = Offset(size.width / 2f, size.height / 2f)
 
-                        // Calculate click coordinates relative to the center
-                        val x_rel = touchPoint.x - center.x
-                        val y_rel = center.y - touchPoint.y
-
-                        // Calculate the angle of the click
-                        var theta = (atan2(y_rel, x_rel)).toDouble()
-
-                        // Adjust the angle for negative values
-                        if (theta < 0) {
-                            theta += 2 * PI
-                        }
-
-                        // Determine which sector is pressed
-                        val sector_angle = 360 / 20
-                        val index = ceil((Math.toDegrees(theta) - 9) / sector_angle)
-
-
-                        // Check if the click is inside the circle
-                        val distance = sqrt(x_rel * x_rel + y_rel * y_rel)
-                        if (distance > 743 / 2) {
-                            Log.d("test", "CLICK IS OUTSIDE OF CIRCLE")
-                            touchedArcIndex = -1.0
-                        } else {
-                            touchedArcIndex = index
-                            if (touchedArcIndex == 20.0) {
-                                touchedArcIndex = 0.0
-                            }
-                        }
-
-
-                        Log.d("test", "x: ${touchPoint.x}, y: ${touchPoint.y}")
-                        Log.d("test", "THETA: ${theta}")
-                        Log.d("test", "Sector: ${touchedArcIndex.toInt()}")
+//                        Log.d("test", "x: ${touchPoint.x}, y: ${touchPoint.y}")
+//                        Log.d("test", "THETA: ${theta}")
+//                        Log.d("test", "Sector: ${touchedArcIndex.toInt()}")
 
 
                         // Initial touch point, start zooming
-//                        scale.value = 5f
+                        scale.value = 5f
 
                         // Calculate the initial offset to center the zoom on the touch point
                         val deltaX = (touchPoint.x - center.x) * (1 - scale.value)
@@ -217,26 +184,40 @@ fun Dartboard(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDrag = { change, dragAmount ->
+//                        touchCoordinates = change.position
+
+                        // On release highlight the correct part of dartboard
+                        touchedArcIndex = highlight(center, change.position)
+
                         // Update the offset as the finger moves
                         val newOffset = canvasOffset.value - dragAmount * 5f
                         canvasOffset.value = newOffset
                     },
                     onDragEnd = {
-                        // Reset scale and offset upon release
+
+                        // Print out last touched sector
+                        Log.d("test", "Sector: ${touchedArcIndex.toInt()}")
+
+                        // Reset scale, offset and highlighted sector upon release
                         scale.value = 1f
                         canvasOffset.value = Offset.Zero
+                        touchedArcIndex = -1.0
                     }
                 )
             }
     )
 
     {
+        // Center of canvas
+        center = Offset(size.width / 2, size.height / 2)
+
+        val startAngle = -9f
+        // sweepAngle - size of arch in degrees, each slice is 360°/20 = 18°
+        val sweepAngle = 18f
 
         var sectorColor: Color
         var colors: Array<Color>
 
-        // Center of canvas
-        val center = Offset(size.width / 2, size.height / 2)
         var currSize = size
 
         // Drawing circles to display dartboard
@@ -262,14 +243,14 @@ fun Dartboard(
                     // Color for the selected arc
                     ( i == touchedArcIndex.toInt() ) -> sectorColor = Color.Yellow
                     // Regular color scheme
-                    ( i % 2 == 0 ) -> sectorColor = colors[0]
-                    else -> sectorColor = colors[1]
+                    ( i % 2 == 0 ) -> sectorColor = colors[1]
+                    else -> sectorColor = colors[0]
                 }
 
                 // Segments as circle
                 drawArc(
                     color = sectorColor,
-                    startAngle = startAngle + i * 18,
+                    startAngle = startAngle + (-i) * 18,
                     sweepAngle = sweepAngle,
                     topLeft = center - Offset(currSize.width / 2, currSize.height / 2),
                     size = currSize,
@@ -279,7 +260,7 @@ fun Dartboard(
                 // White borders around segments
                 drawArc(
                     color = Color.White,
-                    startAngle = startAngle + i * 18,
+                    startAngle = startAngle + (-i) * 18,
                     sweepAngle = sweepAngle,
                     topLeft = center - Offset(currSize.width / 2, currSize.height / 2),
                     size = currSize,
@@ -317,6 +298,38 @@ fun Dartboard(
             }
         }
     }
+}
+
+fun highlight(center: Offset, touchPoint: Offset): Double {
+    var touchedIndex: Double
+    // Calculate click coordinates relative to the center
+    val xRel = touchPoint.x - center.x
+    val yRel = center.y - touchPoint.y
+
+    // Calculate the angle of the click
+    var theta = (atan2(yRel, xRel)).toDouble()
+
+    // Adjust the angle for negative values
+    if (theta < 0) {
+        theta += 2 * PI
+    }
+
+    // Determine which sector is pressed
+    val sectorAngle = 360 / 20
+    val index = ceil((Math.toDegrees(theta) - 9) / sectorAngle)
+
+
+    // Check if the click is inside the circle
+    val distance = sqrt(xRel * xRel + yRel * yRel)
+    if (distance > 743 / 2) {
+        // If touch is outside of circle return -1
+        touchedIndex = -1.0
+    } else {
+        touchedIndex = index
+        
+    }
+
+    return touchedIndex
 }
 
 // old dartsegment composable
