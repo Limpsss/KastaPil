@@ -164,16 +164,10 @@ fun Dartboard(
                 detectTapGestures(
 
                     onPress = { touchPoint ->
-//                        val center = Offset(size.width / 2f, size.height / 2f)
-
-//                        Log.d("test", "x: ${touchPoint.x}, y: ${touchPoint.y}")
-//                        Log.d("test", "THETA: ${theta}")
-//                        Log.d("test", "Sector: ${touchedArcIndex.toInt()}")
-
-
                         // Initial touch point, start zooming
                         scale.value = 5f
 
+                        touchedArcIndex = highlight(center, touchPoint)
                         // Calculate the initial offset to center the zoom on the touch point
                         val deltaX = (touchPoint.x - center.x) * (1 - scale.value)
                         val deltaY = (touchPoint.y - center.y) * (1 - scale.value)
@@ -183,11 +177,11 @@ fun Dartboard(
             }
             .pointerInput(Unit) {
                 detectDragGestures(
-                    onDrag = { change, dragAmount ->
+                    onDrag = { touch, dragAmount ->
 //                        touchCoordinates = change.position
 
                         // On release highlight the correct part of dartboard
-                        touchedArcIndex = highlight(center, change.position)
+                        touchedArcIndex = highlight(center, touch.position)
 
                         // Update the offset as the finger moves
                         val newOffset = canvasOffset.value - dragAmount * 5f
@@ -326,193 +320,13 @@ fun highlight(center: Offset, touchPoint: Offset): Double {
         touchedIndex = -1.0
     } else {
         touchedIndex = index
-        
+        if (touchedIndex == 20.0) {
+            touchedIndex = 0.0
+        }
     }
 
     return touchedIndex
 }
-
-// old dartsegment composable
-
-//@Composable
-//fun DartSegments(
-//    modifier: Modifier = Modifier,
-//    colorOne: Color,
-//    colorTwo: Color,
-//    scale: MutableState<Float>,
-//    canvasOffset: MutableState<Offset>,
-//    viewModel: InGameViewModel) {
-//    val startAngle = -99f
-//    // sweepAngle - size of arch in degrees, each slice is 360°/20 = 18°
-//    val sweepAngle = 18f
-//
-//    // on touch arc
-//    var touchedArcIndex by remember { mutableStateOf(-1.0) }
-//
-//
-//    Canvas(
-//        modifier = modifier
-//            .graphicsLayer(
-//                scaleX = scale.value,
-//                scaleY = scale.value,
-//                translationX = canvasOffset.value.x,
-//                translationY = canvasOffset.value.y
-//            )
-//            // Code that works on drag zoom
-//            .pointerInput(Unit) {
-//                detectTapGestures(
-//
-//                    onPress = { touchPoint ->
-//                        Log.d("test", "SIZE: x: ${size.width}, y: ${size.height}")
-//                        val center = Offset(size.width / 2f, size.height / 2f)
-//
-//                        // Calculate click coordinates relative to the center
-//                        val x_rel = touchPoint.x - center.x
-//                        val y_rel = center.y - touchPoint.y
-//
-//                        // Calculate the angle of the click
-//                        var theta = (atan2(y_rel, x_rel)).toDouble()
-//
-//                        // Adjust the angle for negative values
-//                        if (theta < 0) {
-//                            theta += 2 * PI
-//                        }
-//
-//                        // Determine which sector is pressed
-//                        val sector_angle = 360 / 20
-//                        val index = ceil((Math.toDegrees(theta) - 9) / sector_angle)
-//
-//
-//                        // Check if the click is inside the circle
-//                        val distance = sqrt(x_rel * x_rel + y_rel * y_rel)
-//                        if (distance > 743 / 2) {
-//                            Log.d("test", "CLICK IS OUTSIDE OF CIRCLE")
-//                            touchedArcIndex = -1.0
-//                        } else {
-//                            touchedArcIndex = index
-//                            if (touchedArcIndex == 20.0) {
-//                                touchedArcIndex = 0.0
-//                            }
-//                        }
-//
-//
-//                        Log.d("test", "x: ${touchPoint.x}, y: ${touchPoint.y}")
-//                        Log.d("test", "THETA: ${theta}")
-//                        Log.d("test", "Sector: ${touchedArcIndex.toInt()}")
-//
-//
-//                        // Initial touch point, start zooming
-////                        scale.value = 5f
-//
-//                        // Calculate the initial offset to center the zoom on the touch point
-//                        val deltaX = (touchPoint.x - center.x) * (1 - scale.value)
-//                        val deltaY = (touchPoint.y - center.y) * (1 - scale.value)
-//                        canvasOffset.value = Offset(deltaX, deltaY)
-//                    },
-//                )
-//            }
-//            .pointerInput(Unit) {
-//                detectDragGestures(
-//                    onDrag = { change, dragAmount ->
-//                        // Update the offset as the finger moves
-//                        val newOffset = canvasOffset.value - dragAmount * 5f
-//                        canvasOffset.value = newOffset
-//                    },
-//                    onDragEnd = {
-//                        // Reset scale and offset upon release
-//                        scale.value = 1f
-//                        canvasOffset.value = Offset.Zero
-//                    }
-//                )
-//            }
-//    )
-//
-//    {
-//        drawCircle(color = Color.Black)
-//
-//        val width = size.width
-//        val height = size.height
-//        val radius = minOf(width, height) / 2
-//        val topLeft = Offset((width - 2 * radius) / 2, (height - 2 * radius) / 2)
-//
-//
-//
-//        var segmentColor: Color
-//        for (i in 0..19) {
-//            when {
-//                i == touchedArcIndex.toInt() -> segmentColor = Color.Yellow // Color for the selected arc
-//                i % 2 == 0 -> segmentColor = colorOne // Regular color scheme
-//                else -> segmentColor = colorTwo
-//            }
-//
-//
-//            // White and black color segments
-//            drawArc(
-//                color = segmentColor,
-//                startAngle = startAngle + i * 18,
-//                sweepAngle = sweepAngle,
-//                topLeft = topLeft,
-//                size = size,
-//                useCenter = true
-//            )
-//
-//            // White borders around segments
-//            drawArc(
-//                color = Color.White,
-//                startAngle = startAngle + i * 18,
-//                sweepAngle = sweepAngle,
-//                topLeft = topLeft,
-//                size = size,
-//                useCenter = true,
-//                style = Stroke(width = 2f)
-//            )
-//        }
-//    }
-//}
-
-
-//@Composable
-//fun BullseyeRing(modifier: Modifier,
-//                 color: Color,
-//                 scale: MutableState<Float>,
-//                 canvasOffset: MutableState<Offset>,) {
-//    Canvas(
-//        modifier = modifier
-//            .graphicsLayer(
-//                scaleX = scale.value,
-//                scaleY = scale.value,
-//                translationX = canvasOffset.value.x,
-//                translationY = canvasOffset.value.y
-//            )
-//            .pointerInput(Unit) {
-//                detectTapGestures(
-//                    onPress = { touchPoint ->
-//                        scale.value = 5f
-//                        val center = Offset(size.width / 2f, size.height / 2f)
-//
-//                        // Calculate the offset to center the zoom on the touch point
-//                        val deltaX = (touchPoint.x - center.x) * (1 - scale.value)
-//                        val deltaY = (touchPoint.y - center.y) * (1 - scale.value)
-//                        canvasOffset.value = Offset(deltaX, deltaY)
-//
-//                        tryAwaitRelease()
-//                        // Reset scale and offset upon release
-//                        scale.value = 1f
-//                        canvasOffset.value = Offset.Zero
-//                    }
-//                )
-//            }
-//    )
-//
-//    {
-//        drawCircle(color = color)
-//
-//        // White border:
-//        drawCircle(
-//            color = Color.White,
-//            style = Stroke(2f))
-//    }
-//}
 
 @Preview
 @Composable
