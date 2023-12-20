@@ -41,6 +41,7 @@ import com.example.kastapil.viewModels.InGameViewModel
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.ceil
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -146,10 +147,19 @@ fun Dartboard(
     canvasOffset: MutableState<Offset>,
     viewModel: InGameViewModel) {
 
-    // on touch arc
+    // on touch states
     var touchedArcIndex by remember { mutableStateOf(-1.0) }
-    var center by remember { mutableStateOf(Offset.Zero) }
     var touchCoordinates by remember { mutableStateOf(Offset.Unspecified) }
+    var isDragging by remember { mutableStateOf(false) }
+
+    var center by remember { mutableStateOf(Offset.Zero) }
+    // Size of each ring in dartboard
+    var doublePointRing by remember { mutableStateOf(Size.Zero) }
+    var outerSinglePointRing by remember { mutableStateOf(Size.Zero) }
+    var triplePointRing by remember { mutableStateOf(Size.Zero) }
+    var innerSinglePointRing by remember { mutableStateOf(Size.Zero) }
+    var outerBullseye by remember { mutableStateOf(Size.Zero) }
+    var innerBullseye by remember { mutableStateOf(Size.Zero) }
 
     Canvas(
         modifier = modifier
@@ -162,7 +172,6 @@ fun Dartboard(
             // Code that works on drag zoom
             .pointerInput(Unit) {
                 detectTapGestures(
-
                     onPress = { touchPoint ->
                         // Initial touch point, start zooming
                         scale.value = 5f
@@ -172,16 +181,29 @@ fun Dartboard(
                         val deltaX = (touchPoint.x - center.x) * (1 - scale.value)
                         val deltaY = (touchPoint.y - center.y) * (1 - scale.value)
                         canvasOffset.value = Offset(deltaX, deltaY)
+
+                        tryAwaitRelease()
+                        if (!isDragging) {
+                            // Reset on release if there was no drag
+                            scale.value = 1f
+                            canvasOffset.value = Offset.Zero
+                            touchedArcIndex = -1.0
+                        }
+                        isDragging = false // Reset drag state
                     },
                 )
             }
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDrag = { touch, dragAmount ->
-//                        touchCoordinates = change.position
+                        Log.d("test", "DRAGGING")
 
-                        // On release highlight the correct part of dartboard
-                        touchedArcIndex = highlight(center, touch.position)
+                        // Update drag state
+                        isDragging = true
+                        // Update touch coordinates
+                        touchCoordinates = touch.position
+                        // Highlight the part on the dartboard where user is touching
+                        touchedArcIndex = highlight(center, touchCoordinates)
 
                         // Update the offset as the finger moves
                         val newOffset = canvasOffset.value - dragAmount * 5f
@@ -196,14 +218,35 @@ fun Dartboard(
                         scale.value = 1f
                         canvasOffset.value = Offset.Zero
                         touchedArcIndex = -1.0
+                        isDragging = false // Reset drag state
+
+                        // calculate what point ring:
+                        pointRing(
+                            touchCoordinates,
+                            center,
+                            doublePointRing.width/2f,
+                            outerSinglePointRing.width/2f,
+                            triplePointRing.width/2f,
+                            innerSinglePointRing.width/2f,
+                            outerBullseye.width/2f,
+                            innerBullseye.width/2f)
+
                     }
                 )
             }
     )
 
     {
+        // Initialize the size of each ring in dartboard
+        doublePointRing = size
+        outerSinglePointRing = Size(765f, 765f)
+        triplePointRing = Size(495f, 495f)
+        innerSinglePointRing = Size(450f, 450f)
+        outerBullseye = Size(75f, 75f)
+        innerBullseye = Size(30f, 30f)
+
         // Center of canvas
-        center = Offset(size.width / 2, size.height / 2)
+        center = Offset(size.width / 2f, size.height / 2f)
 
         val startAngle = -9f
         // sweepAngle - size of arch in degrees, each slice is 360°/20 = 18°
@@ -217,10 +260,10 @@ fun Dartboard(
         // Drawing circles to display dartboard
         for (j in 0..3) {
             when (j) {
-                0 -> currSize = size
-                1 -> currSize = Size(765f, 765f)
-                2 -> currSize = Size(495f, 495f)
-                3 -> currSize = Size(450f, 450f)
+                0 -> currSize = doublePointRing // Double point ring
+                1 -> currSize = outerSinglePointRing // Outer single point ring
+                2 -> currSize = triplePointRing // Triple point ring
+                3 -> currSize = innerSinglePointRing // Inner single point ring
             }
             // First and third rings should be red and green to highlight double and triple ring
             if (j % 2 == 0) {
@@ -266,7 +309,7 @@ fun Dartboard(
         // Inner & outer bullseye rings
         for (i in 0..1) {
             if (i == 0) {
-                currSize = Size(75f, 75f)
+                currSize = outerBullseye
                 // Outer bullseye ring:
                 drawCircle(
                     radius = currSize.width / 2,
@@ -279,7 +322,7 @@ fun Dartboard(
                     style = Stroke(2f))
             }
             else {
-                currSize = Size(30f, 30f)
+                currSize = innerBullseye
                 // Inner bullseye ring:
                 drawCircle(
                     radius = currSize.width / 2,
@@ -315,7 +358,7 @@ fun highlight(center: Offset, touchPoint: Offset): Double {
 
     // Check if the click is inside the circle
     val distance = sqrt(xRel * xRel + yRel * yRel)
-    if (distance > 743 / 2) {
+    if (distance > 810 / 2) {
         // If touch is outside of circle return -1
         touchedIndex = -1.0
     } else {
@@ -324,8 +367,35 @@ fun highlight(center: Offset, touchPoint: Offset): Double {
             touchedIndex = 0.0
         }
     }
-
     return touchedIndex
+}
+
+fun pointRing(
+    point: Offset,
+    origo: Offset,
+    radiusDouble: Float,
+    radiusOuterSingle: Float,
+    radiusTriple: Float,
+    radiusInnerSingle: Float,
+    radiusOuterBullseye: Float,
+    radiusInnerBullseye: Float) {
+
+    Log.d("test", "COORDINATES: ${point}")
+
+    // sqrt ( (x - x^o)^2 + (y - y^2)^2 )
+    val pointOnCircle = sqrt( (point.x - origo.x).pow(2) + (point.y - origo.y).pow(2) )
+
+    when {
+        (pointOnCircle < radiusDouble && pointOnCircle > radiusOuterSingle) -> Log.d("test", "Double ring!") // Double ring
+        (pointOnCircle < radiusDouble && pointOnCircle > radiusTriple) -> Log.d("test", "Outer single ring!") // Outer single ring
+        (pointOnCircle < radiusOuterSingle && pointOnCircle > radiusInnerSingle) -> Log.d("test", "Triple ring!") // Triple ring
+        (pointOnCircle < radiusTriple && pointOnCircle > radiusOuterBullseye) -> Log.d("test", "Inner single ring!") // Inner single ring
+
+        (pointOnCircle < radiusInnerSingle && pointOnCircle > radiusInnerBullseye) -> Log.d("test", "Outer bullseye!") // Outer bullseye
+        (pointOnCircle < radiusOuterBullseye) -> Log.d("test", "Inner bullseye!") // Inner bullseye
+
+        else -> Log.d("test", "YOU MISSED THE BOARD!")
+    }
 }
 
 @Preview
