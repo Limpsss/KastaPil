@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,17 +65,37 @@ fun SignInScreen(
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Button(onClick = {
-            viewModel.viewModelScope.launch {
-                val signInIntentSender = viewModel.initiateSignIn()
-                launcher.launch(
-                    IntentSenderRequest.Builder(
-                        signInIntentSender ?: return@launch
-                    ).build())
+        Column {
+            Button(
+                modifier = Modifier
+                    .size(width = 200.dp, height = 50.dp),
+                onClick = {
+                    viewModel.viewModelScope.launch {
+                        val signInIntentSender = viewModel.initiateSignIn()
+                        launcher.launch(
+                            IntentSenderRequest.Builder(
+                                signInIntentSender ?: return@launch
+                            ).build())
+                    }
+            }) {
+                Text(text = "Sign in with Google")
             }
-        }) {
-            Text(text = "Sign in")
+
+            Button(
+                modifier = Modifier
+                    .padding(top = 5.dp)
+                    .size(width = 200.dp, height = 50.dp),
+                onClick = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) {
+                            inclusive = true
+                        }
+                    }
+            }) {
+                Text(text = "Sign in as guest")
+            }
         }
+
     }
 
     LaunchedEffect(key1 = Unit) {
