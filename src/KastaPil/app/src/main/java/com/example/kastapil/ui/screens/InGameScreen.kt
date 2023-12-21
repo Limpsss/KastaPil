@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -151,7 +152,6 @@ fun Dartboard(
 //    var touchedArcIndex by remember { mutableStateOf(-1.0) }
     var touchIndex by remember { mutableStateOf(-1.0) }
     var touchRing by remember { mutableStateOf("") }
-
     var touchCoordinates by remember { mutableStateOf(Offset.Unspecified) }
     var isDragging by remember { mutableStateOf(false) }
 
@@ -200,6 +200,7 @@ fun Dartboard(
                             // Reset on release if there was no drag
                             scale.value = 1f
                             canvasOffset.value = Offset.Zero
+                            viewModel.calculateScore(touchIndex.toInt(), touchRing) // Add score
                             touchIndex = -1.0
                             touchRing = ""
                         }
@@ -239,6 +240,7 @@ fun Dartboard(
                         // Reset scale, offset and highlighted sector upon release
                         scale.value = 1f
                         canvasOffset.value = Offset.Zero
+                        viewModel.calculateScore(touchIndex.toInt(), touchRing) // Add score
                         touchIndex = -1.0
                         touchRing = ""
                         isDragging = false // Reset drag state
