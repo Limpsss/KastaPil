@@ -1,9 +1,8 @@
 package com.example.kastapil.viewModels
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import kotlin.math.log
+import com.example.kastapil.models.GameInfo
 
 class CreateGameViewModel : ViewModel() {
     val is301Selected = mutableStateOf(true)
@@ -90,31 +89,41 @@ class CreateGameViewModel : ViewModel() {
         return false
     }
 
-    fun createGame(): MutableMap<String, String> {
-        val gameInfo = mutableMapOf<String, String>()
-        gameInfo["gameType"] = when {
-            is301Selected.value -> "301"
-            is501Selected.value -> "501"
-            else -> "ERROR"
+    fun createGame(): GameInfo {
+        var gameType = 0
+        var bestOf = 0
+        var playerAmount = 0
+        var playerOne = ""
+        var playerTwo = ""
+
+        gameType = when {
+            is301Selected.value -> 301
+            is501Selected.value -> 501
+            else -> -1
         }
 
-        gameInfo["bestOf"] = when {
-            isBo1Selected.value -> "bestOf1"
-            isBo3Selected.value -> "bestOf3"
-            isBo5Selected.value -> "bestOf5"
-            else -> "ERROR"
+        bestOf = when {
+            isBo1Selected.value -> 1
+            isBo3Selected.value -> 3
+            isBo5Selected.value -> 5
+            else -> -1
         }
 
-        gameInfo["playerAmount"] = when {
-            isPlayerOneSelected.value -> "onePlayer"
-            isPlayerTwoSelected.value -> "twoPlayers"
-            else -> "ERROR"
+        playerAmount = when {
+            isPlayerOneSelected.value -> 1
+            isPlayerTwoSelected.value -> 2
+            else -> -1
         }
 
-        gameInfo["playerOneName"] = playerOneName.value
-        gameInfo["playerTwoName"] = playerTwoName.value
+        playerOne = playerOneName.value
+        playerTwo = playerTwoName.value
 
-        //Log.d("test", "$gameInfo")
-        return gameInfo
+        return GameInfo(
+            gameType,
+            bestOf,
+            playerAmount,
+            playerOne,
+            playerTwo
+        )
     }
 }

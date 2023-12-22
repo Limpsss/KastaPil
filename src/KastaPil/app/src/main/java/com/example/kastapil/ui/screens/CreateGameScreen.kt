@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.kastapil.models.GameInfo
 import com.example.kastapil.navigation.Screen
 import com.example.kastapil.viewModels.CreateGameViewModel
 
@@ -111,7 +112,7 @@ fun CreateGameScreen(
 
             onClick = {
                 if (viewModel.validateNames()) {
-                    val gameInfo = viewModel.createGame()
+                    val gameInfo: GameInfo = viewModel.createGame()
                     navController.navigate(route = Screen.inGame.passGameInfo(gameInfo))
                 }
                 else {

@@ -3,31 +3,33 @@
 package com.example.kastapil.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -35,10 +37,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.kastapil.R
+import com.example.kastapil.models.GameInfo
 import com.example.kastapil.viewModels.InGameViewModel
+import com.example.kastapil.viewModels.InGameViewModelFactory
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.ceil
@@ -47,99 +52,91 @@ import kotlin.math.sqrt
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun InGameScreen(gameInfo: Map<*,*>, navController: NavController, viewModel: InGameViewModel) {
-    // gameIfo =
-    //          "gameType"
-    //          "bestOf"
-    //          "playerAmount"
-    //          "playerOneName"
-    //          "playerTwoName"
+fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
 
-
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Gray)
-
-    ){
-        Column(
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxSize())
-        {
-            // Top half of the screen:
+                .fillMaxWidth()
+                .weight(0.6f)
+                .background(Color.Gray)
+                .border(BorderStroke(1.dp, Color.Red))
+
+        ){
+            val gameInfo: GameInfo = viewModel.gameInfo
             Column(
                 modifier = Modifier
-                    .weight(0.6f) // 50% of the screen
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                    .fillMaxSize()
             ) {
-                if (gameInfo["playerAmount"] == 1) {
-                    Text(
-                        text = gameInfo["playerOneName"].toString(),
-                        fontSize = 32.sp
-                    )
-                }
-                else {
-                    Text(
-                        text = gameInfo["playerOneName"].toString(),
-                        fontSize = 32.sp
-                    )
-                    Text(
-                        text = gameInfo["playerTwoName"].toString(),
-                        fontSize = 32.sp
-                    )
-                }
 
                 Text(
-                    text = "Current score: " + viewModel.playerOneCurrScore.value.toString(),
+                    text = gameInfo.playerOneName,
+                    fontSize = 32.sp
+                )
+                Text(
+                    text = gameInfo.playerTwoName,
+                    fontSize = 32.sp
+                )
+
+                Text(
+                    text = "Current score: " + viewModel.playerOneCurrScore,
                     fontSize = 32.sp
                 )
             }
+        }
 
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize()
-                    .background(color = Color.DarkGray)) {
+        Box (
+            modifier = Modifier
+                .weight(1f)
+                .clip(RectangleShape)
+                .fillMaxSize()
+                .border(BorderStroke(1.dp, Color.Green))
+                .background(color = Color.DarkGray))
+        {
 
-                var scale = remember { mutableStateOf(1f) }
-                var canvasOffset = remember { mutableStateOf(Offset.Zero) }
+            val scale = remember { mutableStateOf(1f) }
+            val canvasOffset = remember { mutableStateOf(Offset.Zero) }
 
-
-                // How i will draw:
+            // How i will draw:
 //                var drawingPoints by remember { mutableStateOf(listOf<Offset>()) }
 //                            }) { offset ->
 //                            drawingPoints = drawingPoints + offset
 //                        }
 //                    })
 
-                Image(
-                    painter = painterResource(id = R.drawable.dart2),
-                    contentDescription = "dartboard",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .size(355.dp)
-                        .graphicsLayer(
-                            scaleX = scale.value,
-                            scaleY = scale.value,
-                            translationX = canvasOffset.value.x,
-                            translationY = canvasOffset.value.y
-                        )
-                )
-                Dartboard(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(270.dp),
-                    scale,
-                    canvasOffset,
-                    viewModel)
-            }
+//            Image(
+//                painter = painterResource(id = R.drawable.dart2),
+//                contentDescription = "dartboard",
+//                modifier = Modifier
+//                    .align(Alignment.Center)
+//                    .graphicsLayer(
+//                        scaleX = scale.value,
+//                        scaleY = scale.value,
+//                        translationX = canvasOffset.value.x,
+//                        translationY = canvasOffset.value.y
+//                    )
+//            )
+
+            DartBoardBackgroundImage(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(358.dp),
+                scale = scale,
+                offset = canvasOffset)
+
+            Dartboard(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxSize(),
+                scale,
+                canvasOffset,
+                viewModel)
         }
     }
 }
-
-
 
 @Composable
 fun Dartboard(
@@ -183,12 +180,13 @@ fun Dartboard(
                         touchRing = pointRing(
                             touchPoint,
                             center,
-                            doublePointRing.width/2f,
-                            outerSinglePointRing.width/2f,
-                            triplePointRing.width/2f,
-                            innerSinglePointRing.width/2f,
-                            outerBullseye.width/2f,
-                            innerBullseye.width/2f)
+                            doublePointRing.width / 2f,
+                            outerSinglePointRing.width / 2f,
+                            triplePointRing.width / 2f,
+                            innerSinglePointRing.width / 2f,
+                            outerBullseye.width / 2f,
+                            innerBullseye.width / 2f
+                        )
 
                         // Calculate the initial offset to center the zoom on the touch point
                         val deltaX = (touchPoint.x - center.x) * (1 - scale.value)
@@ -222,12 +220,13 @@ fun Dartboard(
                         touchRing = pointRing(
                             touchCoordinates,
                             center,
-                            doublePointRing.width/2f,
-                            outerSinglePointRing.width/2f,
-                            triplePointRing.width/2f,
-                            innerSinglePointRing.width/2f,
-                            outerBullseye.width/2f,
-                            innerBullseye.width/2f)
+                            doublePointRing.width / 2f,
+                            outerSinglePointRing.width / 2f,
+                            triplePointRing.width / 2f,
+                            innerSinglePointRing.width / 2f,
+                            outerBullseye.width / 2f,
+                            innerBullseye.width / 2f
+                        )
 
                         Log.d("testtest", "ring: ${touchRing}, index: ${touchIndex}")
 
@@ -250,8 +249,9 @@ fun Dartboard(
     )
 
     {
+
         // Initialize the size of each ring in dartboard
-        doublePointRing = size
+        doublePointRing = Size(810f, 810f)
         outerSinglePointRing = Size(765f, 765f)
         triplePointRing = Size(495f, 495f)
         innerSinglePointRing = Size(450f, 450f)
@@ -277,25 +277,25 @@ fun Dartboard(
                     // Double point ring
                     currSize = doublePointRing
                     currRing = "Double"
-                    colors = arrayOf(Color.Red, Color(0xFF00a000))
+                    colors = arrayOf(Color(0xFF00a000), Color.Red)
                 }
                 1 -> {
                     // Outer single point ring
                     currSize = outerSinglePointRing
                     currRing = "OuterSingle"
-                    colors = arrayOf(Color.Black, Color(0xFFe7e4c7))
+                    colors = arrayOf(Color(0xFFe7e4c7), Color.Black)
                 }
                 2 -> {
                     // Triple point ring
                     currSize = triplePointRing
                     currRing = "Triple"
-                    colors = arrayOf(Color.Red, Color(0xFF00a000))
+                    colors = arrayOf(Color(0xFF00a000), Color.Red)
                 }
                 3 -> {
                     // Inner single point ring
                     currSize = innerSinglePointRing
                     currRing = "InnerSingle"
-                    colors = arrayOf(Color.Black, Color(0xFFe7e4c7))
+                    colors = arrayOf(Color(0xFFe7e4c7), Color.Black)
                 }
             }
             // Drawing 20 segments to form a circle
@@ -363,6 +363,25 @@ fun Dartboard(
     }
 }
 
+@Composable
+fun DartBoardBackgroundImage(
+    modifier: Modifier,
+    scale: MutableState<Float>,
+    offset: MutableState<Offset>
+) {
+    Image(
+        painter = painterResource(id = R.drawable.dart2),
+        contentDescription = "dartboard",
+        modifier = modifier
+            .graphicsLayer(
+                scaleX = scale.value,
+                scaleY = scale.value,
+                translationX = offset.value.x,
+                translationY = offset.value.y
+            )
+    )
+}
+
 fun highlight(center: Offset, touchPoint: Offset): Double {
     var touchedIndex: Double
     // Calculate click coordinates relative to the center
@@ -426,9 +445,8 @@ fun pointRing(
 @Preview
 @Composable
 fun InGameScreenPreview() {
-    val mockGameInfo = mapOf("score" to 10, "player" to "Player1") // Replace with relevant data
     val mockNavController = rememberNavController() // Simple NavController for preview
-    val mockViewModel = InGameViewModel() // You will need to create this mock class
-
-    InGameScreen(mockGameInfo, mockNavController, mockViewModel)
+    val mockViewModel: InGameViewModel =
+        viewModel(factory = InGameViewModelFactory(GameInfo(1, 1, 1, "", ""))) // pass param like this
+    InGameScreen(mockNavController, mockViewModel)
 }

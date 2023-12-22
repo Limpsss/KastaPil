@@ -21,6 +21,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.kastapil.models.GameInfo
 import com.example.kastapil.models.GoogleAuthClient
 import com.example.kastapil.ui.screens.CreateGameScreen
 import com.example.kastapil.ui.screens.HomeScreen
@@ -28,9 +29,12 @@ import com.example.kastapil.ui.screens.InGameScreen
 import com.example.kastapil.ui.screens.SignInScreen
 import com.example.kastapil.viewModels.CreateGameViewModel
 import com.example.kastapil.viewModels.InGameViewModel
+import com.example.kastapil.viewModels.InGameViewModelFactory
 import com.example.kastapil.viewModels.SignInViewModel
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
+import java.lang.reflect.Type
 
 @Composable
 fun SetUpNavHost(
@@ -87,11 +91,16 @@ fun SetUpNavHost(
             route = Screen.inGame.route,
             arguments = listOf(navArgument("gameInfo") {type = NavType.StringType})
         ){
-            val jsonGameInfo = it.arguments?.getString("gameInfo")
-            val gameInfo = Gson().fromJson(jsonGameInfo, Map::class.java)
-
-            val inGameViewModel: InGameViewModel = viewModel()
-            InGameScreen(gameInfo, navController, inGameViewModel)
+            // JSON string from argument
+            val jsonGameInfo: String? = it.arguments?.getString("gameInfo")
+            // The type i want to deserialize to
+            val type: Type = object : TypeToken<GameInfo>() {}.type
+            // Deserialize the JSON string to a Map<String, String>
+            val gameInfo: GameInfo = Gson().fromJson(jsonGameInfo, type)
+//            val inGameViewModel: InGameViewModel = viewModel()
+            val inGameViewModel: InGameViewModel =
+                viewModel(factory = InGameViewModelFactory(gameInfo)) // pass param like this
+            InGameScreen(navController, inGameViewModel)
         }
     }
 }

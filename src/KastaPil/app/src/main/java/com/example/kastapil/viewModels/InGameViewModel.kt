@@ -1,13 +1,27 @@
 package com.example.kastapil.viewModels
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.kastapil.models.GameInfo
 
-class InGameViewModel : ViewModel() {
+class InGameViewModelFactory(private val gameInfo: GameInfo) :
+    ViewModelProvider.NewInstanceFactory() {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = InGameViewModel(gameInfo) as T
+}
 
-    public val playerOneCurrScore = mutableStateOf(0)
+class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
+    // gameInfo =
+    //          "gameType"
+    //          "bestOf"
+    //          "playerAmount"
+    //          "playerOneName"
+    //          "playerTwoName"
+
     private val dartboardMapping = mapOf<Int, Int>(
         0 to 6,
         1 to 13,
@@ -37,13 +51,27 @@ class InGameViewModel : ViewModel() {
         "Triple" to 3
     )
 
+    private val startScore: Int
+    private val onSingleOut: Boolean = false
+
+    var roundsBeforeSingleOut by mutableStateOf(-1)
+    var playerOneCurrScore by mutableStateOf(-1)
+    var playerTwoCurrScore by mutableStateOf(-1)
+
+    init {
+        // set start score based on gameInfo
+        startScore = gameInfo.gameType
+        playerOneCurrScore = startScore
+        playerTwoCurrScore = startScore
+    }
+
     // Score = Dart score, type = single, double or triple
     fun calculateScore(index: Int, type: String) {
         if (type == "OuterBullseye") {
-            playerOneCurrScore.value += 25
+            playerOneCurrScore -= 25
         }
         else if (type == "InnerBullseye") {
-            playerOneCurrScore.value += 50
+            playerOneCurrScore -= 50
         }
         else {
             val points = dartboardMapping[index]
@@ -51,17 +79,23 @@ class InGameViewModel : ViewModel() {
 
             // reset points for testing purpose
             if (points == 1) {
-                playerOneCurrScore.value = 0
+                playerOneCurrScore = 0
                 return
             }
 
             if (points != null && multi != null) {
-                playerOneCurrScore.value += points * multi
+                playerOneCurrScore -= points * multi
             }
         }
     }
 
-    fun onSegmentClicked(segmentIndex: Int) {
-        println("Segment $segmentIndex clicked")
+    fun checkNewScore(prevScore: Int, hitScore: Int): Boolean {
+        if (prevScore - hitScore < 0) {
+            return false
+        }
+        if (prevScore - hitScore < 50) {
+            // börja räkna ner varje runda från 5, efter 5 miss av dubbel så kan man gå ut på singel
+        }
+        return true
     }
 }
