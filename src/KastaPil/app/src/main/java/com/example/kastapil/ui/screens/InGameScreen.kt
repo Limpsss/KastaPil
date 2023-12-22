@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,28 +63,26 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.6f)
-                .background(Color.Gray)
-                .border(BorderStroke(1.dp, Color.Red))
+                .weight(0.4f)
+                .background(Color.Black)
+//                .border(BorderStroke(1.dp, Color.Red))
 
         ){
-            val gameInfo: GameInfo = viewModel.gameInfo
+            val currentPlayerScore = viewModel.currentPlayer.currScore
+            val currentPlayerName = viewModel.currentPlayer.name
             Column(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
 
                 Text(
-                    text = gameInfo.playerOneName,
+                    text = currentPlayerName,
+                    color = Color.White,
                     fontSize = 32.sp
                 )
                 Text(
-                    text = gameInfo.playerTwoName,
-                    fontSize = 32.sp
-                )
-
-                Text(
-                    text = "Current score: " + viewModel.playerOneCurrScore,
+                    text = "$currentPlayerScore",
+                    color = Color.White,
                     fontSize = 32.sp
                 )
             }
@@ -93,9 +93,9 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
                 .weight(1f)
                 .clip(RectangleShape)
                 .fillMaxSize()
-                .border(BorderStroke(1.dp, Color.Green))
-                .background(color = Color.DarkGray))
-        {
+                .border(BorderStroke(1.dp, Color.DarkGray))
+                .background(color = Color.Black)
+        ) {
 
             val scale = remember { mutableStateOf(1f) }
             val canvasOffset = remember { mutableStateOf(Offset.Zero) }
@@ -106,26 +106,13 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
 //                            drawingPoints = drawingPoints + offset
 //                        }
 //                    })
-
-//            Image(
-//                painter = painterResource(id = R.drawable.dart2),
-//                contentDescription = "dartboard",
-//                modifier = Modifier
-//                    .align(Alignment.Center)
-//                    .graphicsLayer(
-//                        scaleX = scale.value,
-//                        scaleY = scale.value,
-//                        translationX = canvasOffset.value.x,
-//                        translationY = canvasOffset.value.y
-//                    )
-//            )
-
             DartBoardBackgroundImage(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(358.dp),
+                    .size((358 * 0.9).dp),
                 scale = scale,
-                offset = canvasOffset)
+                offset = canvasOffset
+            )
 
             Dartboard(
                 modifier = Modifier
@@ -133,7 +120,19 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
                     .fillMaxSize(),
                 scale,
                 canvasOffset,
-                viewModel)
+                viewModel
+            )
+
+        }
+
+        Box(
+            modifier = Modifier
+                .weight(0.42f)
+                .fillMaxSize()
+//                .border(BorderStroke(1.dp, Color.Blue))
+                .background(color = Color.Black)
+        ){
+            DomdLogo(modifier = Modifier.fillMaxSize())
         }
     }
 }
@@ -174,7 +173,7 @@ fun Dartboard(
                 detectTapGestures(
                     onPress = { touchPoint ->
                         // Initial touch point, start zooming
-                        scale.value = 5f
+                        scale.value = 6f
 
                         touchIndex = highlight(center, touchPoint)
                         touchRing = pointRing(
@@ -228,10 +227,8 @@ fun Dartboard(
                             innerBullseye.width / 2f
                         )
 
-                        Log.d("testtest", "ring: ${touchRing}, index: ${touchIndex}")
-
                         // Update the offset as the finger moves
-                        val newOffset = canvasOffset.value - dragAmount * 5f
+                        val newOffset = canvasOffset.value - dragAmount * 6f
                         canvasOffset.value = newOffset
                     },
                     onDragEnd = {
@@ -251,12 +248,12 @@ fun Dartboard(
     {
 
         // Initialize the size of each ring in dartboard
-        doublePointRing = Size(810f, 810f)
-        outerSinglePointRing = Size(765f, 765f)
-        triplePointRing = Size(495f, 495f)
-        innerSinglePointRing = Size(450f, 450f)
-        outerBullseye = Size(75f, 75f)
-        innerBullseye = Size(30f, 30f)
+        doublePointRing = Size(810f*0.9f, 810f*0.9f)
+        outerSinglePointRing = Size(765f*0.9f, 765f*0.9f)
+        triplePointRing = Size(495f*0.9f, 495f*0.9f)
+        innerSinglePointRing = Size(450f*0.9f, 450f*0.9f)
+        outerBullseye = Size(75f*0.9f, 75f*0.9f)
+        innerBullseye = Size(30f*0.9f, 30f*0.9f)
 
         // Center of canvas
         center = Offset(size.width / 2f, size.height / 2f)
@@ -369,6 +366,21 @@ fun DartBoardBackgroundImage(
     scale: MutableState<Float>,
     offset: MutableState<Offset>
 ) {
+    Canvas(
+        modifier = modifier
+            .graphicsLayer(
+                scaleX = scale.value,
+                scaleY = scale.value,
+                translationX = offset.value.x,
+                translationY = offset.value.y
+            )
+
+    ) {
+        drawCircle(
+            color = Color.White,
+            style = Stroke(width = 4f)
+        )
+    }
     Image(
         painter = painterResource(id = R.drawable.dart2),
         contentDescription = "dartboard",
@@ -379,6 +391,16 @@ fun DartBoardBackgroundImage(
                 translationX = offset.value.x,
                 translationY = offset.value.y
             )
+    )
+}
+
+@Composable
+fun DomdLogo(modifier: Modifier) {
+    Image(
+        painter = painterResource(id = R.drawable.logga),
+        contentDescription = "Dömd logga",
+        modifier = modifier,
+        contentScale = ContentScale.Crop
     )
 }
 
@@ -423,8 +445,6 @@ fun pointRing(
     radiusInnerSingle: Float,
     radiusOuterBullseye: Float,
     radiusInnerBullseye: Float): String {
-
-    Log.d("test", "COORDINATES: ${point}")
 
     // sqrt ( (x - x^o)^2 + (y - y^2)^2 )
     val pointOnCircle = sqrt( (point.x - origo.x).pow(2) + (point.y - origo.y).pow(2) )

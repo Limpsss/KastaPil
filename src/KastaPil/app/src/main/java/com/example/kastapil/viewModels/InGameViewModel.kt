@@ -1,13 +1,13 @@
 package com.example.kastapil.viewModels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.kastapil.models.GameInfo
+import com.example.kastapil.models.PlayerState
 
 class InGameViewModelFactory(private val gameInfo: GameInfo) :
     ViewModelProvider.NewInstanceFactory() {
@@ -15,12 +15,6 @@ class InGameViewModelFactory(private val gameInfo: GameInfo) :
 }
 
 class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
-    // gameInfo =
-    //          "gameType"
-    //          "bestOf"
-    //          "playerAmount"
-    //          "playerOneName"
-    //          "playerTwoName"
 
     private val dartboardMapping = mapOf<Int, Int>(
         0 to 6,
@@ -51,51 +45,108 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
         "Triple" to 3
     )
 
-    private val startScore: Int
-    private val onSingleOut: Boolean = false
+    // Initialize players
+    private val players = listOf(
+        PlayerState(gameInfo.playerOneName, gameInfo.gameType),
+        PlayerState(gameInfo.playerTwoName, gameInfo.gameType)
+    )
 
-    var roundsBeforeSingleOut by mutableStateOf(-1)
-    var playerOneCurrScore by mutableStateOf(-1)
-    var playerTwoCurrScore by mutableStateOf(-1)
+    // Observable state for the current player index
+    private var currentPlayerIndex = 0
 
-    init {
-        // set start score based on gameInfo
-        startScore = gameInfo.gameType
-        playerOneCurrScore = startScore
-        playerTwoCurrScore = startScore
-    }
+    // Current player as a state
+    var currentPlayer by mutableStateOf(players[currentPlayerIndex])
 
     // Score = Dart score, type = single, double or triple
     fun calculateScore(index: Int, type: String) {
+//        Log.d("ingameviewmodel", "player: ${currentPlayer.name}, score: ${currentPlayer.currScore}")
+        var points = 0
         if (type == "OuterBullseye") {
-            playerOneCurrScore -= 25
+            points = 25
         }
         else if (type == "InnerBullseye") {
-            playerOneCurrScore -= 50
+            points = 50
         }
         else {
-            val points = dartboardMapping[index]
+            val single = dartboardMapping[index]
             val multi = mapHitType[type]
-
-            // reset points for testing purpose
-            if (points == 1) {
-                playerOneCurrScore = 0
-                return
-            }
-
-            if (points != null && multi != null) {
-                playerOneCurrScore -= points * multi
+            if (single != null && multi != null) {
+                points = single * multi
             }
         }
+
+        val newScore = currentPlayer.currScore - points
+        if (checkValidNewScore(newScore, type)) {
+            // update current player score
+            currentPlayer.updateScore(newScore)
+            if (currentPlayer.currScore == 0) {
+                // call a win set function
+                currentPlayer.updateScore(gameInfo.gameType)
+            }
+        }
+        // ends turn if 3 darts have been thrown
+        endTurn(currentPlayer.currScore, newScore)
     }
 
-    fun checkNewScore(prevScore: Int, hitScore: Int): Boolean {
-        if (prevScore - hitScore < 0) {
-            return false
+    private fun checkValidNewScore(newScore: Int, type: String): Boolean {
+        val result: Boolean
+        // out on single rules
+        if (currentPlayer.onSingleOut) {
+            if (newScore == 0) {
+                // you won the set!!!
+                Log.d("ingameviewmodel", "you won on single out!!!")
+                result = true
+            }
+            else if (newScore < 0) {
+                // error message
+                Log.d("ingameviewmodel", "Score 1 or below, try again!")
+                result = false
+            }
+            else {
+                Log.d("edf", "dsf")
+                result =  true
+            }
         }
-        if (prevScore - hitScore < 50) {
-            // börja räkna ner varje runda från 5, efter 5 miss av dubbel så kan man gå ut på singel
+        // regular rules
+        else {
+            val isDouble = type == "Double" || type == "InnerBullseye"
+            if (newScore == 0 && isDouble) {
+                // You won the set!!!
+                Log.d("ingameviewmodel", "you won on double out")
+                result = true
+            }
+            else if (newScore <= 1) {
+                // error message
+                Log.d("ingameviewmodel", "Score 1 or below, try again!")
+                result = false
+            }
+            else {
+                Log.d("edf", "dsf")
+                result = true
+            }
         }
-        return true
+        return result
+    }
+
+    private fun endTurn(prevScore: Int, newScore: Int) {
+        if (isEndOfTurn()) {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size
+            currentPlayer = players[currentPlayerIndex]
+        }
+
+//        if (!playerOneState.onSingleOut) {
+//            if (prevScore >= 50 && newScore < 50) {
+//
+//            }
+//        }
+    }
+
+    private fun isEndOfTurn(): Boolean {
+        currentPlayer.dartCount += 1
+        if (currentPlayer.dartCount == 3) {
+            currentPlayer.dartCount = 0
+            return true
+        }
+        return false
     }
 }
