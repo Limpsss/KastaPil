@@ -3,6 +3,7 @@
 package com.example.kastapil.ui.screens
 
 import android.util.Log
+import android.view.MotionEvent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -12,8 +13,11 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -33,7 +37,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,7 +71,7 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
                 .fillMaxWidth()
                 .weight(0.4f)
                 .background(Color.Black)
-//                .border(BorderStroke(1.dp, Color.Red))
+//              .border(BorderStroke(1.dp, Color.Red))
 
         ){
             val currentPlayerScore = viewModel.currentPlayer.currScore
@@ -78,13 +84,31 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
                 Text(
                     text = currentPlayerName,
                     color = Color.White,
-                    fontSize = 32.sp
+                    fontSize = 32.sp,
                 )
                 Text(
                     text = "$currentPlayerScore",
                     color = Color.White,
                     fontSize = 32.sp
                 )
+                Row(
+                    modifier = Modifier
+                ) {
+                    Text(
+                        text = viewModel.currentPlayer.dart1,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.padding(0.dp,0.dp,5.dp,0.dp))
+                    Text(
+                        text = viewModel.currentPlayer.dart2,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.padding(0.dp,0.dp,5.dp,0.dp))
+                    Text(
+                        text = viewModel.currentPlayer.dart3,
+                    color = Color.White
+                    )
+                }
             }
         }
 
@@ -150,6 +174,7 @@ fun Dartboard(
     var touchRing by remember { mutableStateOf("") }
     var touchCoordinates by remember { mutableStateOf(Offset.Unspecified) }
     var isDragging by remember { mutableStateOf(false) }
+    var cancelDart by remember { mutableStateOf(false) }
 
     var center by remember { mutableStateOf(Offset.Zero) }
     // Size of each ring in dartboard
@@ -172,6 +197,7 @@ fun Dartboard(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = { touchPoint ->
+
                         // Initial touch point, start zooming
                         scale.value = 6f
 
@@ -208,13 +234,15 @@ fun Dartboard(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDrag = { touch, dragAmount ->
+                        Log.d("ingamescreen", "${touch.position}")
 
                         // Update drag state
                         isDragging = true
                         // Update touch coordinates
                         touchCoordinates = touch.position
-                        // Highlight the part on the dartboard where user is touching
+                        // Check if touch is outside of box to cancel dart
 
+                        // Highlight the part on the dartboard where user is touching
                         touchIndex = highlight(center, touchCoordinates)
                         touchRing = pointRing(
                             touchCoordinates,
@@ -232,7 +260,6 @@ fun Dartboard(
                         canvasOffset.value = newOffset
                     },
                     onDragEnd = {
-
                         // Reset scale, offset and highlighted sector upon release
                         scale.value = 1f
                         canvasOffset.value = Offset.Zero
@@ -402,6 +429,15 @@ fun DomdLogo(modifier: Modifier) {
         modifier = modifier,
         contentScale = ContentScale.Crop
     )
+}
+
+fun isOutsideOfBox(coordinates: Offset, scale: MutableState<Float>): Boolean {
+    var res = false
+    val x = coordinates.x / scale.value
+    val y = coordinates.y / scale.value
+    Log.d("ingamescreen", "Absolute Offset( " + x + ", " + y + ")")
+
+    return res
 }
 
 fun highlight(center: Offset, touchPoint: Offset): Double {

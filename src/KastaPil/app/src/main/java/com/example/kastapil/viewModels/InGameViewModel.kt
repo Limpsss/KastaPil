@@ -46,14 +46,18 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
     )
 
     // Initialize players
-    private val players = listOf(
-        PlayerState(gameInfo.playerOneName, gameInfo.gameType),
-        PlayerState(gameInfo.playerTwoName, gameInfo.gameType)
-    )
-
+    private val players = if (gameInfo.playerAmount == 2) {
+        listOf(
+            PlayerState(gameInfo.playerOneName, gameInfo.gameType),
+            PlayerState(gameInfo.playerTwoName, gameInfo.gameType)
+        )
+    } else {
+        listOf(
+            PlayerState(gameInfo.playerOneName, gameInfo.gameType)
+        )
+    }
     // Observable state for the current player index
     private var currentPlayerIndex = 0
-
     // Current player as a state
     var currentPlayer by mutableStateOf(players[currentPlayerIndex])
 
@@ -78,10 +82,10 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
         val newScore = currentPlayer.currScore - points
         if (checkValidNewScore(newScore, type)) {
             // update current player score
-            currentPlayer.updateScore(newScore)
+            updateScore(points, type)
             if (currentPlayer.currScore == 0) {
                 // call a win set function
-                currentPlayer.updateScore(gameInfo.gameType)
+                endLeg()
             }
         }
         // ends turn if 3 darts have been thrown
@@ -128,8 +132,22 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
         return result
     }
 
+    private fun updateScore(points: Int, type: String) {
+        var dartText = ""
+        when {
+            type == "OuterSingle" || type == "InnerSingle" || type == "OuterBullseye" -> dartText = "S$points"
+            type == "Double" || type == "InnerBullseye" -> dartText = "D${points/2}"
+            type == "Triple" -> dartText = "T${points/3}"
+            else -> dartText = type // Should be "Miss" in this else case
+        }
+        currentPlayer.updateScore(points, dartText)
+    }
+
     private fun endTurn(prevScore: Int, newScore: Int) {
-        if (isEndOfTurn()) {
+        // end turn if player has thrown 3 darts
+        if (currentPlayer.dartCount == 3) {
+            currentPlayer.endTurn()
+
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size
             currentPlayer = players[currentPlayerIndex]
         }
@@ -141,12 +159,26 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
 //        }
     }
 
-    private fun isEndOfTurn(): Boolean {
-        currentPlayer.dartCount += 1
-        if (currentPlayer.dartCount == 3) {
-            currentPlayer.dartCount = 0
-            return true
+    private fun endLeg() {
+        // do some ui stuff
+
+        for(player in players) {
+            var won = false
+            if (player.currScore == 0) {
+                won = true
+            } 
+            player.endLeg(won)
+
+            val setsWon = player.legsWon
+            val bestOf = gameInfo.bestOf
+            if ( ( setsWon == 1 && bestOf == 1 ) || ( setsWon == 2 && bestOf == 3 ) || setsWon == 3 ) {
+                endGame()
+            }
         }
-        return false
+    }
+
+    private fun endGame() {
+        Log.d("ingameviewmodel", "YOU WOOOOOON!")
+        // some ui stuff or whatever
     }
 }
