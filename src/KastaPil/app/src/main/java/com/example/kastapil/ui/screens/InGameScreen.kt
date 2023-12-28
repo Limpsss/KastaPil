@@ -9,8 +9,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -37,12 +34,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,6 +51,7 @@ import com.example.kastapil.models.GameInfo
 import com.example.kastapil.viewModels.InGameViewModel
 import com.example.kastapil.viewModels.InGameViewModelFactory
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.ceil
 import kotlin.math.pow
@@ -161,6 +160,7 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Dartboard(
     modifier: Modifier,
@@ -168,13 +168,11 @@ fun Dartboard(
     canvasOffset: MutableState<Offset>,
     viewModel: InGameViewModel) {
 
-    // on touch states
-//    var touchedArcIndex by remember { mutableStateOf(-1.0) }
     var touchIndex by remember { mutableStateOf(-1.0) }
     var touchRing by remember { mutableStateOf("") }
-    var touchCoordinates by remember { mutableStateOf(Offset.Unspecified) }
-    var isDragging by remember { mutableStateOf(false) }
-    var cancelDart by remember { mutableStateOf(false) }
+    var currentTouchPoint by remember { mutableStateOf(Offset.Zero) }
+    var initialTouchPoint by remember { mutableStateOf(Offset.Zero) }
+    var dragThreshold by remember { mutableStateOf(0) }
 
     var center by remember { mutableStateOf(Offset.Zero) }
     // Size of each ring in dartboard
@@ -193,17 +191,16 @@ fun Dartboard(
                 translationX = canvasOffset.value.x,
                 translationY = canvasOffset.value.y
             )
-            // Code that works on drag zoom
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = { touchPoint ->
-
-                        // Initial touch point, start zooming
+            .pointerInteropFilter { motionEvent ->
+                when (motionEvent.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        // Logic for tap gesture start
+                        initialTouchPoint = Offset(motionEvent.x, motionEvent.y)
                         scale.value = 6f
 
-                        touchIndex = highlight(center, touchPoint)
+                        touchIndex = highlight(center, initialTouchPoint)
                         touchRing = pointRing(
-                            touchPoint,
+                            initialTouchPoint,
                             center,
                             doublePointRing.width / 2f,
                             outerSinglePointRing.width / 2f,
@@ -214,66 +211,49 @@ fun Dartboard(
                         )
 
                         // Calculate the initial offset to center the zoom on the touch point
-                        val deltaX = (touchPoint.x - center.x) * (1 - scale.value)
-                        val deltaY = (touchPoint.y - center.y) * (1 - scale.value)
+                        val deltaX = (initialTouchPoint.x - center.x) * (1 - scale.value)
+                        val deltaY = (initialTouchPoint.y - center.y) * (1 - scale.value)
                         canvasOffset.value = Offset(deltaX, deltaY)
-
-                        tryAwaitRelease()
-                        if (!isDragging) {
-                            // Reset on release if there was no drag
-                            scale.value = 1f
-                            canvasOffset.value = Offset.Zero
-                            viewModel.calculateScore(touchIndex.toInt(), touchRing) // Add score
-                            touchIndex = -1.0
-                            touchRing = ""
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        dragThreshold += 1
+                        if (dragThreshold > 10) {
+                            // Logic for drag gesture
+                            currentTouchPoint =
+                                Offset(motionEvent.x / scale.value, motionEvent.y / scale.value)
+                            // Highlight the part on the dartboard where user is touching
+                            touchIndex = highlight(center, currentTouchPoint)
+                            touchRing = pointRing(
+                                currentTouchPoint,
+                                center,
+                                doublePointRing.width / 2f,
+                                outerSinglePointRing.width / 2f,
+                                triplePointRing.width / 2f,
+                                innerSinglePointRing.width / 2f,
+                                outerBullseye.width / 2f,
+                                innerBullseye.width / 2f
+                            )
+                            // Update the offset as the finger moves
+                            val dragAmount = currentTouchPoint - initialTouchPoint
+                            val newOffset = canvasOffset.value - dragAmount * 3f
+                            canvasOffset.value = newOffset
+                            initialTouchPoint = currentTouchPoint
                         }
-                        isDragging = false // Reset drag state
-                    },
-                )
-            }
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDrag = { touch, dragAmount ->
-                        Log.d("ingamescreen", "${touch.position}")
-
-                        // Update drag state
-                        isDragging = true
-                        // Update touch coordinates
-                        touchCoordinates = touch.position
-                        // Check if touch is outside of box to cancel dart
-
-                        // Highlight the part on the dartboard where user is touching
-                        touchIndex = highlight(center, touchCoordinates)
-                        touchRing = pointRing(
-                            touchCoordinates,
-                            center,
-                            doublePointRing.width / 2f,
-                            outerSinglePointRing.width / 2f,
-                            triplePointRing.width / 2f,
-                            innerSinglePointRing.width / 2f,
-                            outerBullseye.width / 2f,
-                            innerBullseye.width / 2f
-                        )
-
-                        // Update the offset as the finger moves
-                        val newOffset = canvasOffset.value - dragAmount * 6f
-                        canvasOffset.value = newOffset
-                    },
-                    onDragEnd = {
+                    }
+                    MotionEvent.ACTION_UP -> {
                         // Reset scale, offset and highlighted sector upon release
                         scale.value = 1f
                         canvasOffset.value = Offset.Zero
                         viewModel.calculateScore(touchIndex.toInt(), touchRing) // Add score
                         touchIndex = -1.0
                         touchRing = ""
-                        isDragging = false // Reset drag state
+                        dragThreshold = 0
                     }
-                )
+                }
+                true // Return true to consume the event
             }
     )
-
     {
-
         // Initialize the size of each ring in dartboard
         doublePointRing = Size(810f*0.9f, 810f*0.9f)
         outerSinglePointRing = Size(765f*0.9f, 765f*0.9f)
