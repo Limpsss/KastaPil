@@ -5,7 +5,10 @@ import android.content.Intent
 import android.content.IntentSender
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.kastapil.models.GameInfo
 import com.example.kastapil.models.GoogleAuthClient
 import com.example.kastapil.models.SignInResult
 import com.example.kastapil.models.UserData
@@ -15,19 +18,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+class SignInViewModelFactory(private val googleAuthClient: GoogleAuthClient) :
+    ViewModelProvider.NewInstanceFactory() {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = SignInViewModel(googleAuthClient) as T
+}
+
 data class SignInState(
     val isSignInSuccessful: Boolean = false,
     val signInError: String? = null
 )
 
-class SignInViewModel(application: Application) : AndroidViewModel(application) {
-    val googleAuthClient by lazy {
-        GoogleAuthClient(
-            context = application,
-            oneTapClient = Identity.getSignInClient(application)
-        )
-    }
-
+class SignInViewModel(private val googleAuthClient: GoogleAuthClient) : ViewModel() {
     private val _state = MutableStateFlow(SignInState())
     val state = _state.asStateFlow()
 

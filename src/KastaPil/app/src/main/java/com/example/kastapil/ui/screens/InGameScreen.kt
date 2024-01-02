@@ -4,6 +4,7 @@ package com.example.kastapil.ui.screens
 
 import android.util.Log
 import android.view.MotionEvent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -17,7 +18,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -30,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -39,9 +44,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
@@ -52,18 +55,18 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.kastapil.R
 import com.example.kastapil.models.GameInfo
+import com.example.kastapil.navigation.Screen
 import com.example.kastapil.viewModels.InGameViewModel
 import com.example.kastapil.viewModels.InGameViewModelFactory
 import kotlin.math.PI
-import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.ceil
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
+    var openAlertDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -114,7 +117,6 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
                 }
             }
         }
-        var boxSize by remember { mutableStateOf(IntSize.Zero) }
         Box (
             modifier = Modifier
                 .weight(1f)
@@ -122,19 +124,16 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
                 .fillMaxSize()
                 .border(BorderStroke(1.dp, Color.DarkGray))
                 .background(color = Color.Black)
-                .onGloballyPositioned {
-                    boxSize = it.size
-                }
         ) {
             val scale = remember { mutableStateOf(1f) }
             val canvasOffset = remember { mutableStateOf(Offset.Zero) }
 
-            val density = LocalDensity.current
-            val widthInDp = with(density) { boxSize.width.toDp() }
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp.dp
             DartBoardBackgroundImage(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(widthInDp * 0.93f, widthInDp * 0.93f),
+                    .size(screenWidth * 0.93f, screenWidth * 0.93f),
                 scale = scale,
                 offset = canvasOffset
             )
@@ -159,6 +158,24 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
             DomdLogo(modifier = Modifier.fillMaxSize())
         }
     }
+
+
+    BackHandler(enabled = true) {
+        openAlertDialog = true
+    }
+
+    if (openAlertDialog) {
+        QuitGameDialog(
+            onDismissRequest = {
+                openAlertDialog = false
+           },
+            onConfirmation = {
+                openAlertDialog = false
+                handleBackPressInGameScreen(navController)
+           }
+        )
+    }
+
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -299,6 +316,7 @@ fun Dartboard(
         drawDarts(scale.value, viewModel)
 
     }
+
 }
 
 fun DrawScope.drawDartboard(
@@ -489,6 +507,53 @@ fun DomdLogo(modifier: Modifier) {
         contentDescription = "Dömd logga",
         modifier = modifier,
         contentScale = ContentScale.Crop
+    )
+}
+
+fun handleBackPressInGameScreen(navController: NavController) {
+    navController.navigate(Screen.Home.route) {
+        popUpTo(Screen.Home.route) {
+            inclusive = true
+        }
+    }
+}
+
+@Composable
+fun QuitGameDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit
+) {
+    AlertDialog(
+        icon = {
+            Icon(Icons.Default.Info, contentDescription = "Icon")
+        },
+        title = {
+            Text(text = "Quit game")
+        },
+        text = {
+            Text(text = "Do you want to quit the game? All progress will be lost.")
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Dismiss")
+            }
+        }
     )
 }
 

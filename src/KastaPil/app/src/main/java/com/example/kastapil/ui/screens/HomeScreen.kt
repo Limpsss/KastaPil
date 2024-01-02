@@ -1,12 +1,13 @@
 package com.example.kastapil.ui.screens
 
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,16 +15,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,16 +43,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.kastapil.R
-import com.example.kastapil.models.UserData
 import com.example.kastapil.navigation.Screen
+import com.example.kastapil.viewModels.HomeViewModel
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    userData: UserData?,
-    onSignOut: () -> Unit
+    viewModel: HomeViewModel
 ) {
+    var openAlertDialog by remember { mutableStateOf(false) }
     val animatedBlur = animateDpAsState(targetValue = 30.dp, label = "")
+    val userData = viewModel.userData
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -91,7 +104,11 @@ fun HomeScreen(
                 colors = ButtonDefaults.buttonColors(Color.LightGray),
                 modifier = Modifier
                     .size(width = 110.dp, height = 40.dp),
-                onClick = onSignOut
+                onClick = {
+                    viewModel.signOut()
+                    Toast.makeText(context, "Signed out", Toast.LENGTH_LONG).show()
+                    navController.popBackStack()
+                }
             ){
                 Text(text = "Sign out")
             }
@@ -120,6 +137,77 @@ fun HomeScreen(
                 text = "Create Game",
                 fontSize = 24.sp
             )
+        }
+    }
+
+    BackHandler(enabled = true) {
+        openAlertDialog = true
+    }
+
+    // If back press check if user is signed in and open a dialog
+    // If user is a guest just go back to sign in screen
+    if (openAlertDialog) {
+        if (viewModel.isSignedIn) {
+            HomeScreenDialog(
+                onDismissRequest = {
+                    openAlertDialog = false
+                },
+                onConfirmation = {
+                    openAlertDialog = false
+                    viewModel.signOut()
+                    handleBackPressHomeScreen(navController)
+                }
+            )
+        }
+        else {
+            handleBackPressHomeScreen(navController)
+        }
+    }
+}
+
+@Composable
+fun HomeScreenDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit
+) {
+    AlertDialog(
+        icon = {
+            Icon(Icons.Default.Info, contentDescription = "Icon")
+        },
+        title = {
+            Text(text = "Sign out")
+        },
+        text = {
+            Text(text = "Do you want to sign out?")
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Sign out")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+fun handleBackPressHomeScreen(navController: NavController) {
+    navController.navigate(Screen.SignIn.route) {
+        popUpTo(Screen.SignIn.route) {
+            inclusive = true
         }
     }
 }

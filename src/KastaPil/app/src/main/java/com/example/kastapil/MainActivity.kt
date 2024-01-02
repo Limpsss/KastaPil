@@ -22,13 +22,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val googleAuthClient = GoogleAuthClient(
+            context = applicationContext,
+            oneTapClient = Identity.getSignInClient(applicationContext)
+        )
         setContent {
             KastaPilTheme {
                 SetStatusBarColor(color = Color.Black)
 
                 navController = rememberNavController()
-                SetUpNavHost(navController, lifecycleScope, applicationContext)
-                
+                SetUpNavHost(navController, googleAuthClient)
             }
         }
     }
