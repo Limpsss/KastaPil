@@ -23,9 +23,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
@@ -48,6 +55,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.kastapil.R
 import com.example.kastapil.models.GameInfo
 import com.example.kastapil.navigation.Screen
 import com.example.kastapil.viewModels.CreateGameViewModel
@@ -73,20 +81,25 @@ fun CreateGameScreen(
             ) { keyboardController?.hide() }
 
     ) {
-        Text(
-            modifier = Modifier
-                .padding(start = 24.dp, top = 8.dp)
-                .clickable {
-                    navController.navigate(Screen.Home.route) {
+        // Go back button "<-"
+        IconButton(
+            onClick = {
+                navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) {
                             inclusive = true
                         }
-                    }
-                },
-            text = "x",
-            color = Color.White,
-            fontSize = 28.sp,
+                }
+           },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.ArrowBack,
+                contentDescription = stringResource(R.string.go_back_button),
+                modifier = Modifier.size(32.dp),
+                tint = Color.White
             )
+        }
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -122,7 +135,7 @@ fun CreateGameScreen(
 
             }) {
             Text(
-                text = "Create Game",
+                text = stringResource(R.string.create_game_button),
                 fontSize = 24.sp
             )
         }
@@ -159,9 +172,21 @@ fun GameTypeBox(viewModel: CreateGameViewModel) {
                 verticalAlignment = Alignment.Bottom
             ) {
 
-                CustomButton("301", true, is301Selected) { viewModel.selectGameType("301") }
+                CustomButton(
+                    text = stringResource(R.string.game_type_301),
+                    bigButton = true,
+                    isSelected = is301Selected,
+                    onSelected = { viewModel.selectGameType(301) }
+                )
+
                 Spacer(modifier = Modifier.width(32.dp))
-                CustomButton("501", true, is501Selected) { viewModel.selectGameType("501") }
+
+                CustomButton(
+                    stringResource(R.string.game_type_501),
+                    bigButton = true,
+                    isSelected = is501Selected,
+                    onSelected = { viewModel.selectGameType(501) }
+                )
             }
         }
     }
@@ -185,7 +210,7 @@ fun BestOfBox(viewModel: CreateGameViewModel) {
             Text(
                 modifier = Modifier
                     .padding(12.dp),
-                text = "BEST OF",
+                text = stringResource(R.string.best_of),
                 fontSize = 16.sp,
                 color = Color.White
             )
@@ -196,11 +221,30 @@ fun BestOfBox(viewModel: CreateGameViewModel) {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
-                CustomButton(text = "Bo1", false, isBo1Selected) { viewModel.selectBestOf("Bo1") }
+                CustomButton(
+                    text = stringResource(R.string.best_of_one),
+                    bigButton = false,
+                    isSelected = isBo1Selected,
+                    onSelected = { viewModel.selectBestOf(5) }
+                )
+
                 Spacer(modifier = Modifier.width(18.dp))
-                CustomButton(text = "Bo3", false, isBo3Selected) { viewModel.selectBestOf("Bo3") }
+
+                CustomButton(
+                    text = stringResource(R.string.best_of_three),
+                    bigButton = false,
+                    isSelected = isBo3Selected,
+                    onSelected = { viewModel.selectBestOf(3) }
+                )
+
                 Spacer(modifier = Modifier.width(18.dp))
-                CustomButton(text = "Bo5", false, isBo5Selected) { viewModel.selectBestOf("Bo5") }
+
+                CustomButton(
+                    text = stringResource(R.string.best_of_five),
+                    bigButton = false,
+                    isSelected = isBo5Selected,
+                    onSelected = { viewModel.selectBestOf(1) }
+                )
             }
         }
     }
@@ -210,8 +254,6 @@ fun BestOfBox(viewModel: CreateGameViewModel) {
 fun ChoosePlayersBox(viewModel: CreateGameViewModel) {
     val isPlayerOneSelected = viewModel.isPlayerOneSelected.value
     val isPlayerTwoSelected = viewModel.isPlayerTwoSelected.value
-    val playerOneName = viewModel.playerOneName
-    val playerTwoName = viewModel.playerTwoName
 
     Box(
         modifier = Modifier
@@ -236,13 +278,27 @@ fun ChoosePlayersBox(viewModel: CreateGameViewModel) {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
-                CustomButton(text = "1 Player", true, isPlayerOneSelected) { viewModel.selectPlayers("1 Player") }
+
+                CustomButton(
+                    text = stringResource(R.string.one_player),
+                    bigButton = true,
+                    isSelected = isPlayerOneSelected,
+                    onSelected = { viewModel.selectPlayers(1) }
+                    )
+
                 Spacer(modifier = Modifier.width(32.dp))
-                CustomButton(text = "2 Players", true, isPlayerTwoSelected) { viewModel.selectPlayers("2 Players") }
+
+                CustomButton(
+                    text = stringResource(R.string.two_players),
+                    bigButton = true,
+                    isSelected = isPlayerTwoSelected,
+                    onSelected = { viewModel.selectPlayers(2) }
+                )
             }
-            CustomTextField("Player 1", viewModel)
+
+            CustomTextField(stringResource(R.string.one_player), viewModel)
             if (isPlayerTwoSelected) {
-                CustomTextField("Player 2", viewModel)
+                CustomTextField(stringResource(R.string.two_players), viewModel)
             }
         }
     }
@@ -251,14 +307,28 @@ fun ChoosePlayersBox(viewModel: CreateGameViewModel) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun CustomTextField(player: String, viewModel: CreateGameViewModel) {
-    val textState = if (player == "Player 1") viewModel.playerOneName else viewModel.playerTwoName
+    val playerOneStringResource = stringResource(R.string.one_player)
+    val placeHolder: String
+    val textState: MutableState<String>
+    if (player == playerOneStringResource) {
+        textState = viewModel.playerOneName
+        placeHolder = stringResource(R.string.player_one_placeholder)
+    } else {
+        textState = viewModel.playerTwoName
+        placeHolder = stringResource(R.string.player_two_placeholder)
+    }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     OutlinedTextField (
         value = textState.value,
-        onValueChange = {
-                        if (player == "Player 1") viewModel.onNameOneChanged(it)
-                        else viewModel.onNameTwoChanged(it) },
+        onValueChange = { value ->
+            if (player == playerOneStringResource) {
+                viewModel.onNameOneChanged(value)
+            }
+            else {
+                viewModel.onNameTwoChanged(value)
+            }
+       },
         modifier = Modifier
             .padding(5.dp),
             colors = TextFieldDefaults.textFieldColors(
@@ -269,7 +339,7 @@ fun CustomTextField(player: String, viewModel: CreateGameViewModel) {
 
             ),
         shape = RoundedCornerShape(percent = 60),
-        placeholder = { Text(text = "$player name...")},
+        placeholder = { Text(text = placeHolder)},
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done // Set the IME action to Done or any other appropriate action
         ),

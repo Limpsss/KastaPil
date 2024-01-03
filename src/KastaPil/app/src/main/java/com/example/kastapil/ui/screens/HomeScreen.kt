@@ -18,10 +18,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.remember
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,6 +75,22 @@ fun HomeScreen(
                 .blur(radius = animatedBlur.value),
                 contentScale = ContentScale.Crop
         )
+        // Settings button top right
+        IconButton(
+            onClick = {
+                navController.navigate(Screen.Settings.route)
+           },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Settings,
+                contentDescription = stringResource(R.string.settings_button),
+                modifier = Modifier.size(32.dp),
+                tint = Color.White
+            )
+        }
+
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
@@ -110,7 +129,7 @@ fun HomeScreen(
                     navController.popBackStack()
                 }
             ){
-                Text(text = "Sign out")
+                Text(text = stringResource(R.string.sign_out_button))
             }
         }
 
@@ -134,7 +153,7 @@ fun HomeScreen(
                 navController.navigate(route = Screen.CreateGame.route)
             }) {
             Text(
-                text = "Create Game",
+                text = stringResource(R.string.create_game_button),
                 fontSize = 24.sp
             )
         }
@@ -175,10 +194,10 @@ fun HomeScreenDialog(
             Icon(Icons.Default.Info, contentDescription = "Icon")
         },
         title = {
-            Text(text = "Sign out")
+            Text(text = stringResource(R.string.alert_dialog_title))
         },
         text = {
-            Text(text = "Do you want to sign out?")
+            Text(text = stringResource(R.string.alert_dialog_description))
         },
         onDismissRequest = {
             onDismissRequest()
@@ -189,7 +208,7 @@ fun HomeScreenDialog(
                     onConfirmation()
                 }
             ) {
-                Text("Sign out")
+                Text(text = stringResource(R.string.alert_dialog_confirm))
             }
         },
         dismissButton = {
@@ -198,7 +217,7 @@ fun HomeScreenDialog(
                     onDismissRequest()
                 }
             ) {
-                Text("Cancel")
+                Text(text = stringResource(R.string.alert_dialog_dismiss))
             }
         }
     )

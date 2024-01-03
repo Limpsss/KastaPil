@@ -15,4 +15,5 @@ sealed class Screen (val route: String) {
             return "in_game_screen/$jsonGameInfo"
         }
     }
+    object Settings: Screen(route = "settings_screen")
 }

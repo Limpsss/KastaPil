@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KastaPil</string>
+    <string name="web_client_id">YOUR_WEB_CLIENT_ID</string>
+    <string name="kastapil">kastapil</string>
+
+
+    <!--  ________________  SIGN IN SCREEN  ________________  -->
+    <string name="sign_in_google">Logga in med Google</string>
+    <string name="sign_in_guest">Logga in som gäst</string>
+    <string name="successful_sign_in">Inloggning lyckades</string>
+
+
+    <!--  ________________  HOME SCREEN  ________________  -->
+    <string name="alert_dialog_title">Logga ut</string>
+    <string name="alert_dialog_description">Vill du logga ut?</string>
+    <string name="alert_dialog_confirm">Logga ut</string>
+    <string name="alert_dialog_dismiss">Avbryt</string>
+
+    <string name="sign_out_button">Logga ut</string>
+    <string name="settings_button">Inställningar</string>
+    <string name="create_game_button">Skapa spel</string>
+
+
+    <!--  ________________  CREATE GAME SCREEN  ________________  -->
+    <string name="go_back_button">Gå tillbaka</string>
+
+    <string name="game_type">Speltyp</string>
+    <string name="game_type_301">301</string>
+    <string name="game_type_501">501</string>
+
+    <string name="best_of">Bäst av</string>
+    <string name="best_of_one">Bo1</string>
+    <string name="best_of_three">Bo3</string>
+    <string name="best_of_five">Bo5</string>
+
+    <string name="players">Spelare</string>
+    <string name="one_player">1 Spelare</string>
+    <string name="two_players">2 Spelare</string>
+    <string name="player_one_placeholder">Spelare 1 namn...</string>
+    <string name="player_two_placeholder">Spelare 2 namn...</string>
+</resources>

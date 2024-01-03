@@ -1,5 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">KastaPil</string>
     <string name="web_client_id">YOUR_WEB_CLIENT_ID</string>
-    <string name="kastapil" />
+    <string name="kastapil">kastapil</string>
+
+
+    <!--  ________________  SIGN IN SCREEN  ________________  -->
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="sign_in_guest">Sign in as guest</string>
+    <string name="successful_sign_in">Sign in successful</string>
+
+
+    <!--  ________________  HOME SCREEN  ________________  -->
+    <string name="alert_dialog_title">Sign out</string>
+    <string name="alert_dialog_description">Do you want to sign out?</string>
+    <string name="alert_dialog_confirm">Sign out</string>
+    <string name="alert_dialog_dismiss">Cancel</string>
+
+    <string name="sign_out_button">Sign out</string>
+    <string name="settings_button">Settings</string>
+    <string name="create_game_button">Create game</string>
+
+
+    <!--  ________________  CREATE GAME SCREEN  ________________  -->
+    <string name="go_back_button">Go back</string>
+
+    <string name="game_type">Game type</string>
+    <string name="game_type_301">301</string>
+    <string name="game_type_501">501</string>
+
+    <string name="best_of">Best of</string>
+    <string name="best_of_one">Bo1</string>
+    <string name="best_of_three">Bo3</string>
+    <string name="best_of_five">Bo5</string>
+
+    <string name="players">Players</string>
+    <string name="one_player">1 Player</string>
+    <string name="two_players">2 Players</string>
+    <string name="player_one_placeholder">Player 1 name...</string>
+    <string name="player_two_placeholder">Player 2 name...</string>
 </resources>

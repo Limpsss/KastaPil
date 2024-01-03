@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -35,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.kastapil.R
 import com.example.kastapil.navigation.Screen
 import com.example.kastapil.viewModels.SignInState
 import com.example.kastapil.viewModels.SignInViewModel
@@ -78,7 +80,7 @@ fun SignInScreen(
                             ).build())
                     }
             }) {
-                Text(text = "Sign in with Google")
+                Text(text = stringResource(R.string.sign_in_google))
             }
 
             Button(
@@ -92,7 +94,7 @@ fun SignInScreen(
                         }
                     }
             }) {
-                Text(text = "Sign in as guest")
+                Text(text = stringResource(R.string.sign_in_guest))
             }
         }
 
@@ -108,11 +110,12 @@ fun SignInScreen(
         }
     }
 
+    val successfulMessage = stringResource(R.string.successful_sign_in)
     LaunchedEffect(key1 = state.isSignInSuccessful) {
         if (state.isSignInSuccessful) {
             Toast.makeText(
                 context,
-                "Sign in successful",
+                successfulMessage,
                 Toast.LENGTH_LONG
             ).show()
 

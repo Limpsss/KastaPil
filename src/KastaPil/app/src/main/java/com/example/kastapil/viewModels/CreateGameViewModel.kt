@@ -18,32 +18,32 @@ class CreateGameViewModel : ViewModel() {
     val playerOneName = mutableStateOf("Limps")
     val playerTwoName = mutableStateOf("")
 
-    fun selectGameType(type: String) {
+    fun selectGameType(type: Int) {
         when (type) {
-            "301" -> {
+            301 -> {
                 is301Selected.value = true
                 is501Selected.value = false
             }
-            "501" -> {
+            501 -> {
                 is301Selected.value = false
                 is501Selected.value = true
             }
         }
     }
 
-    fun selectBestOf(type: String) {
+    fun selectBestOf(type: Int) {
         when (type) {
-            "Bo1" -> {
+            1 -> {
                 isBo1Selected.value = true
                 isBo3Selected.value = false
                 isBo5Selected.value = false
             }
-            "Bo3" -> {
+            3 -> {
                 isBo1Selected.value = false
                 isBo3Selected.value = true
                 isBo5Selected.value = false
             }
-            "Bo5" -> {
+            5 -> {
                 isBo1Selected.value = false
                 isBo3Selected.value = false
                 isBo5Selected.value = true
@@ -51,13 +51,13 @@ class CreateGameViewModel : ViewModel() {
         }
     }
 
-    fun selectPlayers(type: String) {
+    fun selectPlayers(type: Int) {
         when (type) {
-            "1 Player" -> {
+            1 -> {
                 isPlayerOneSelected.value = true
                 isPlayerTwoSelected.value = false
             }
-            "2 Players" -> {
+            2 -> {
                 isPlayerOneSelected.value = false
                 isPlayerTwoSelected.value = true
             }

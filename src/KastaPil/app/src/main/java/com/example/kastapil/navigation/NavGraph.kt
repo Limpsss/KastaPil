@@ -26,12 +26,14 @@ import com.example.kastapil.models.GoogleAuthClient
 import com.example.kastapil.ui.screens.CreateGameScreen
 import com.example.kastapil.ui.screens.HomeScreen
 import com.example.kastapil.ui.screens.InGameScreen
+import com.example.kastapil.ui.screens.SettingsScreen
 import com.example.kastapil.ui.screens.SignInScreen
 import com.example.kastapil.viewModels.CreateGameViewModel
 import com.example.kastapil.viewModels.HomeViewModel
 import com.example.kastapil.viewModels.HomeViewModelFactory
 import com.example.kastapil.viewModels.InGameViewModel
 import com.example.kastapil.viewModels.InGameViewModelFactory
+import com.example.kastapil.viewModels.SettingsViewModel
 import com.example.kastapil.viewModels.SignInViewModel
 import com.example.kastapil.viewModels.SignInViewModelFactory
 import com.google.android.gms.auth.api.identity.Identity
@@ -49,6 +51,8 @@ fun SetUpNavHost(
         navController = navController,
         startDestination = Screen.SignIn.route
     ){
+
+        // Sign in screen
         composable(
             route = Screen.SignIn.route
         ) {
@@ -59,6 +63,7 @@ fun SetUpNavHost(
             )
         }
 
+        // Home screen
         composable(
             route = Screen.Home.route,
         ){
@@ -66,6 +71,7 @@ fun SetUpNavHost(
             HomeScreen(navController, homeViewModel)
         }
 
+        // Create game screen
         composable(
             route = Screen.CreateGame.route
         ){
@@ -73,6 +79,7 @@ fun SetUpNavHost(
             CreateGameScreen(navController, createGameViewModel)
         }
 
+        // In game screen
         composable(
             route = Screen.inGame.route,
             arguments = listOf(navArgument("gameInfo") {type = NavType.StringType})
@@ -87,6 +94,14 @@ fun SetUpNavHost(
             val inGameViewModel: InGameViewModel =
                 viewModel(factory = InGameViewModelFactory(gameInfo)) // pass param like this
             InGameScreen(navController, inGameViewModel)
+        }
+
+        // Settings screen
+        composable(
+            route = Screen.Settings.route
+        ){
+            val settingsViewModel: SettingsViewModel = viewModel()
+            SettingsScreen(settingsViewModel)
         }
     }
 }
