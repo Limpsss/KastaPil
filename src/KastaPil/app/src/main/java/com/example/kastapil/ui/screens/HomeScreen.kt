@@ -85,7 +85,7 @@ fun HomeScreen(
         ) {
             Icon(
                 imageVector = Icons.Rounded.Settings,
-                contentDescription = stringResource(R.string.settings_button),
+                contentDescription = stringResource(R.string.settings),
                 modifier = Modifier.size(32.dp),
                 tint = Color.White
             )

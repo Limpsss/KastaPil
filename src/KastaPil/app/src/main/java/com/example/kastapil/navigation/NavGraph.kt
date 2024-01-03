@@ -101,7 +101,7 @@ fun SetUpNavHost(
             route = Screen.Settings.route
         ){
             val settingsViewModel: SettingsViewModel = viewModel()
-            SettingsScreen(settingsViewModel)
+            SettingsScreen(settingsViewModel, navController)
         }
     }
 }
