@@ -11,14 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.kastapil.R
 import com.example.kastapil.navigation.Screen
+import com.example.kastapil.ui.components.CustomDropdownMenu
 import com.example.kastapil.viewModels.SettingsViewModel
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
@@ -55,233 +54,174 @@ import com.example.kastapil.viewModels.SettingsViewModel
 fun SettingsScreen(viewModel: SettingsViewModel, navController: NavController) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Box(
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-    ){
-        // Go back button "<-"
-//        IconButton(
-//            onClick = {
-//                navController.navigate(Screen.Home.route) {
-//                    popUpTo(Screen.Home.route) {
-//                        inclusive = true
-//                    }
-//                }
-//            },
-//            modifier = Modifier
-//                .align(Alignment.TopStart)
-//        ) {
-//            Icon(
-//                imageVector = Icons.Rounded.ArrowBack,
-//                contentDescription = stringResource(R.string.go_back_button),
-//                modifier = Modifier.size(32.dp),
-//                tint = Color.White
-//            )
-//        }
-//
-//        Text(
-//            text = stringResource(R.string.settings),
-//            modifier = Modifier
-//                .align(Alignment.TopCenter),
-//            color = Color.White,
-//            fontSize = 28.sp
-//        )
-        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-        Scaffold(
-            modifier = Modifier
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(text = stringResource(R.string.settings))
-                    },
-                    navigationIcon = {
-                        IconButton (
-                            onClick = {
-                                navController.navigate(Screen.Home.route) {
-                                    popUpTo(Screen.Home.route) {
-                                        inclusive = true
-                                    }
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(text = stringResource(R.string.settings))
+                },
+                navigationIcon = {
+                    IconButton (
+                        onClick = {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Home.route) {
+                                    inclusive = true
                                 }
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.go_back_button),
-                                tint = Color.Black
-                            )
                         }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Color.White,
-                        titleContentColor = Color.Black,
-                    ),
-                    scrollBehavior = scrollBehavior
-                )
-            },
-        ) { innerPadding ->
-            Column(
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.go_back_button),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+                scrollBehavior = scrollBehavior
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+        ) {
+
+            // Appearance box
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .wrapContentHeight()
+                    .padding(8.dp, 8.dp, 8.dp, 0.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
             ) {
-
-                val configuration = LocalConfiguration.current
-                val screenWidth = configuration.screenWidthDp.dp
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .width(screenWidth * 0.9f)
-                        .height(170.dp)
-                        .background(Color.White)
+                Column (
+                    modifier = Modifier.padding(12.dp)
                 ) {
-                    Column (modifier = Modifier.fillMaxSize()) {
+                    // Title of box
+                    Text(
+                        text = stringResource(R.string.appearance),
+                        color = Color.Gray,
+                        fontSize = 18.sp
+                    )
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = stringResource(R.string.appearance),
-                            modifier = Modifier.padding(5.dp),
-                            color = Color.Gray,
-                            fontSize = 18.sp
+                           text = stringResource(R.string.theme),
+                           modifier = Modifier
+                               .weight(1f),
+                           color = MaterialTheme.colorScheme.onPrimaryContainer,
+                           fontSize = 18.sp
                         )
 
-                        Row (
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                               text = stringResource(R.string.theme),
-                               modifier = Modifier
-                                   .padding(start = 5.dp)
-                                   .weight(1f),
-                               color = Color.Black,
-                               fontSize = 18.sp
-                            )
-
-                            val themes = arrayOf("Auto", "DömD Light", "DömD Dark")
-                            var selectedTheme by remember { mutableStateOf(themes.first()) }
-                            CustomDropdownMenu(
-                                modifier = Modifier.weight(1.2f),
-                                items = themes,
-                                selectedItem = selectedTheme,
-                                onItemSelected = { theme -> selectedTheme = theme }
-                            )
-                        }
-
-                       Row (
-                           modifier = Modifier.fillMaxWidth(),
-                           verticalAlignment = Alignment.CenterVertically
-                       ) {
-                           Text(
-                               text = stringResource(R.string.language),
-                               modifier = Modifier
-                                   .padding(start = 5.dp)
-                                   .weight(1f),
-                               color = Color.Black,
-                               fontSize = 18.sp
-                           )
-
-                           val languages = arrayOf(stringResource(R.string.english), stringResource(R.string.swedish))
-                           var selectedLanguage by remember { mutableStateOf(languages.first()) }
-                           CustomDropdownMenu(
-                               modifier = Modifier.weight(1.2f),
-                               items = languages,
-                               selectedItem = selectedLanguage,
-                               onItemSelected = { lang -> selectedLanguage = lang }
-                           )
-                       }
+                        val themes = arrayOf("Auto", "DömD Light", "DömD Dark")
+                        val selectedTheme by remember { mutableStateOf(themes.first()) }
+                        CustomDropdownMenu(
+                            modifier = Modifier.weight(1.2f),
+                            items = themes,
+                            selectedItem = selectedTheme,
+                            onItemSelected = { theme ->
+                                if (themes.indexOf(theme) == 0) {
+                                    viewModel.changeTheme(null)
+                                } else if (themes.indexOf(theme) == 1) {
+                                    viewModel.changeTheme(false)
+                                } else if (themes.indexOf(theme) == 2) {
+                                    viewModel.changeTheme(true)
+                                }
+                            }
+                        )
                     }
+
+                   Row (
+                       modifier = Modifier
+                           .fillMaxWidth(),
+                       verticalAlignment = Alignment.CenterVertically
+                   ) {
+                       Text(
+                           text = stringResource(R.string.language),
+                           modifier = Modifier
+                               .weight(1f),
+                           color = MaterialTheme.colorScheme.onPrimaryContainer,
+                           fontSize = 18.sp
+                       )
+
+                       val currLanguage = getCurrUserLanguage(viewModel.currLangCode)
+                       val languages = arrayOf(stringResource(R.string.english), stringResource(R.string.swedish))
+                       val selectedLanguage by remember { mutableStateOf(currLanguage) }
+                       CustomDropdownMenu(
+                           modifier = Modifier.weight(1.2f),
+                           items = languages,
+                           selectedItem = selectedLanguage,
+                           onItemSelected = { lang ->
+                               if (languages.indexOf(lang) == 0) {
+                                   viewModel.changeLanguage("en")
+                               } else if (languages.indexOf(lang) == 1) {
+                                   viewModel.changeLanguage("sv")
+                               }
+                           }
+                       )
+                   }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(15.dp))
+            // Username box
+            Box(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .padding(8.dp, 8.dp, 8.dp, 0.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Column (modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = stringResource(R.string.username),
+                        color = Color.Gray,
+                        fontSize = 18.sp
+                    )
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .width(screenWidth * 0.9f)
-                        .height(100.dp)
-                        .background(Color.White)
-                ) {
-                    Column (modifier = Modifier.fillMaxSize()) {
-                        Text(
-                            text = stringResource(R.string.username),
-                            modifier = Modifier.padding(5.dp),
-                            color = Color.Gray,
+                    TextField(
+                        value = viewModel.username.value,
+                        onValueChange = { value -> viewModel.onUsernameChange(value) },
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = TextStyle(
                             fontSize = 18.sp
-                        )
-
-                        TextField(
-                            value = viewModel.username.value,
-                            onValueChange = { value -> viewModel.onUsernameChange(value) },
-                            modifier = Modifier.fillMaxWidth(),
-                            textStyle = TextStyle(
-                                fontSize = 18.sp
-                            ),
-                            placeholder = { Text(text = stringResource(R.string.placeholder_username)) },
-                            colors = TextFieldDefaults.textFieldColors(
-                                textColor = Color.Black,
-                                containerColor = Color.White,
-                                focusedTrailingIconColor = Color.Black,
-                                unfocusedTrailingIconColor = Color.Black,
-                                unfocusedIndicatorColor = Color.Black,
-                                focusedIndicatorColor = Color.Black
-                            ),
-                        )
-                    }
+                        ),
+                        placeholder = { Text(text = stringResource(R.string.placeholder_username)) },
+                        colors = TextFieldDefaults.textFieldColors(
+                            textColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            focusedTrailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            unfocusedTrailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            focusedIndicatorColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                    )
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomDropdownMenu(
-    modifier: Modifier,
-    items: Array<String>,
-    selectedItem: String,
-    onItemSelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = modifier
-    ) {
-        TextField(
-            value = selectedItem,
-            onValueChange = {},
-            readOnly = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor(),
-            colors = TextFieldDefaults.textFieldColors(
-                textColor = Color.Black,
-                containerColor = Color.White,
-                focusedTrailingIconColor = Color.Black,
-                unfocusedTrailingIconColor = Color.Black,
-                unfocusedIndicatorColor = Color.Black,
-                focusedIndicatorColor = Color.Black,
-            ),
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(Color.White)
-        ) {
-            items.forEach { item ->
-                DropdownMenuItem(
-                    text = { Text(text = item, color = Color.Black) },
-                    onClick = {
-                        onItemSelected(item)
-                        expanded = false
-                    }
-                )
-            }
-        }
+fun getCurrUserLanguage(langCode: String): String {
+    var res = ""
+    if (langCode == "sv") {
+        res = stringResource(R.string.swedish)
     }
+    else if (langCode == "en") {
+        res = stringResource(R.string.english)
+    }
+    return res
 }
 
 

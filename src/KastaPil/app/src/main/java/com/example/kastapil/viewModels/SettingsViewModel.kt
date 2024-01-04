@@ -2,26 +2,28 @@ package com.example.kastapil.viewModels
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.kastapil.models.AppearanceManager
 
-class SettingsViewModel: ViewModel() {
+class SettingsViewModelFactory(private val appearanceManager: AppearanceManager) :
+    ViewModelProvider.NewInstanceFactory() {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = SettingsViewModel(appearanceManager) as T
+}
+
+class SettingsViewModel(private val appearanceManager: AppearanceManager): ViewModel() {
     val username = mutableStateOf("")
-    val englishSelected = mutableStateOf(true)
-    val swedishSelected = mutableStateOf(false)
+    var currLangCode = appearanceManager.currLangCode
 
     fun onUsernameChange(newString: String) {
         username.value = newString
     }
 
-    fun selectLanguage(lang: String) {
-        when (lang) {
-            "ENG" -> {
-                englishSelected.value = true
-                swedishSelected.value = false
-            }
-            "SWE" -> {
-                englishSelected.value = false
-                swedishSelected.value = true
-            }
-        }
+    fun changeLanguage(langCode: String) {
+        appearanceManager.changeLanguage(langCode)
+        currLangCode = langCode
+    }
+
+    fun changeTheme(isDarkMode: Boolean?) {
+        appearanceManager.changeTheme(isDarkMode)
     }
 }

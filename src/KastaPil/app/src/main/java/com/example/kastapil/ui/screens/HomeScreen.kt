@@ -16,25 +16,40 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.remember
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -47,8 +62,19 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.kastapil.R
 import com.example.kastapil.navigation.Screen
+import com.example.kastapil.ui.components.AppBar
 import com.example.kastapil.viewModels.HomeViewModel
+import kotlinx.coroutines.launch
 
+data class MenuItem(
+    val id: String,
+    val title: String,
+    val contentDescription: String,
+    val icon: ImageVector
+)
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
@@ -59,114 +85,207 @@ fun HomeScreen(
     val userData = viewModel.userData
     val context = LocalContext.current
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
-        contentAlignment = Alignment.Center
-    ) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-        val painter1 = painterResource(id = R.drawable.darkgray2)
-        Image(
-            painter = painter1,
-            contentDescription = "background",
-            modifier = Modifier
-                .fillMaxSize()
-                .blur(radius = animatedBlur.value),
-                contentScale = ContentScale.Crop
+
+    val items = listOf(
+        MenuItem(
+            id = "home",
+            title = "Home",
+            contentDescription = "home",
+            icon = Icons.Default.Home,
+        ),
+        MenuItem(
+            id = "statistics",
+            title = "Statistics",
+            contentDescription = "statistics",
+            icon = Icons.Default.Person,
+        ),
+        MenuItem(
+            id = "settings",
+            title = "Settings",
+            contentDescription = "settings",
+            icon = Icons.Default.Settings,
+        ),
+        MenuItem(
+            id = "about",
+            title = "About",
+            contentDescription = "about",
+            icon = Icons.Default.Info,
         )
-        // Settings button top right
-        IconButton(
-            onClick = {
-                navController.navigate(Screen.Settings.route)
-           },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Settings,
-                contentDescription = stringResource(R.string.settings),
-                modifier = Modifier.size(32.dp),
-                tint = Color.White
-            )
-        }
+    )
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
+    ModalNavigationDrawer(
+        drawerContent = {
+            ModalDrawerSheet {
+                Spacer(modifier = Modifier.height(16.dp))
+                if(userData?.profilePictureUrl != null) {
+                    AsyncImage(
+                        model = userData.profilePictureUrl,
+                        contentDescription = "Profile picture",
+                        modifier = Modifier
+                            .align(CenterHorizontally)
+                            .size(110.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                if(userData?.username != null) {
+                    Text(
+                        text = userData.username,
+                        modifier = Modifier.align(CenterHorizontally),
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.LightGray
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+                items.forEach { item ->
+                    NavigationDrawerItem(
+                        label = { Text(text = item.title) },
+                        selected = false,
+                        onClick = {
+                            when (item.id) {
+                                "home" -> navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Home.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                            when (item.id) {
+                                "statistics" -> navController.navigate(Screen.Statistics.route) {
+                                    popUpTo(Screen.Statistics.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                            when (item.id) {
+                                "settings" -> navController.navigate(Screen.Settings.route) {
+                                    popUpTo(Screen.Settings.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                            // navigate or something
+                            scope.launch {
+                                drawerState.close()
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.contentDescription
+                            )
+                        },
+                        modifier = Modifier
+                            .padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                }
+            }
+        },
+        drawerState = drawerState
+    ) {
+        Scaffold(
+            topBar = {
+                AppBar(
+                    title = "DÖMD",
+                    icon = Icons.Default.Menu,
+                    onMenuIconClick = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }
+                )
+            },
 
-            if(userData?.profilePictureUrl != null) {
-                AsyncImage(
-                    model = userData.profilePictureUrl,
-                    contentDescription = "Profile picture",
+            ) { contentPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center
+            ) {
+
+                val painter1 = painterResource(id = R.drawable.darkgray2)
+                Image(
+                    painter = painter1,
+                    contentDescription = "background",
                     modifier = Modifier
-                        .size(70.dp)
-                        .clip(CircleShape),
+                        .fillMaxSize()
+                        .blur(radius = animatedBlur.value),
                     contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            if(userData?.username != null) {
-                Text(
-                    text = userData.username,
-                    textAlign = TextAlign.Center,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.LightGray
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-            Button(
-                colors = ButtonDefaults.buttonColors(Color.LightGray),
-                modifier = Modifier
-                    .size(width = 110.dp, height = 40.dp),
-                onClick = {
-                    viewModel.signOut()
-                    Toast.makeText(context, "Signed out", Toast.LENGTH_LONG).show()
-                    navController.popBackStack()
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = CenterHorizontally
+                ) {
+//                    Spacer(modifier = Modifier.height(16.dp))
+
+//                    if(userData?.profilePictureUrl != null) {
+//                        AsyncImage(
+//                            model = userData.profilePictureUrl,
+//                            contentDescription = "Profile picture",
+//                            modifier = Modifier
+//                                .size(70.dp)
+//                                .clip(CircleShape),
+//                            contentScale = ContentScale.Crop
+//                        )
+//                        Spacer(modifier = Modifier.height(8.dp))
+//                    }
+//                    if(userData?.username != null) {
+//                        Text(
+//                            text = userData.username,
+//                            textAlign = TextAlign.Center,
+//                            fontSize = 16.sp,
+//                            fontWeight = FontWeight.SemiBold,
+//                            color = Color.LightGray
+//                        )
+//                        Spacer(modifier = Modifier.height(10.dp))
+//                    }
+
+                    val painter2 = painterResource(id = R.drawable.dart2)
+                    Image(
+                        painter = painter2,
+                        contentDescription = "dartboard",
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    )
                 }
-            ){
-                Text(text = stringResource(R.string.sign_out_button))
+
+
+
+                Button(
+                    colors = ButtonDefaults.buttonColors(Color.LightGray),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 20.dp)
+                        .size(width = 210.dp, height = 60.dp)
+                        .fillMaxWidth(),
+
+                    onClick = {
+                        navController.navigate(route = Screen.CreateGame.route)
+                    }) {
+                    Text(
+                        text = stringResource(R.string.create_game_button),
+                        fontSize = 24.sp
+                    )
+                }
             }
         }
 
-        val painter2 = painterResource(id = R.drawable.dart2)
-        Image(
-            painter = painter2,
-            contentDescription = "dartboard",
-            modifier = Modifier
-                .fillMaxWidth(),
-        )
-
-        Button(
-            colors = ButtonDefaults.buttonColors(Color.LightGray),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 20.dp)
-                .size(width = 210.dp, height = 60.dp)
-                .fillMaxWidth(),
-
-            onClick = {
-                navController.navigate(route = Screen.CreateGame.route)
-            }) {
-            Text(
-                text = stringResource(R.string.create_game_button),
-                fontSize = 24.sp
-            )
-        }
-    }
-
-    BackHandler(enabled = true) {
-        openAlertDialog = true
-    }
-
-    // If back press check if user is signed in and open a dialog
-    // If user is a guest just go back to sign in screen
-    if (openAlertDialog) {
         if (viewModel.isSignedIn) {
+            BackHandler(enabled = true) {
+                openAlertDialog = true
+            }
+        }
+        // If back press and if user is signed in and open a dialog
+        if (openAlertDialog) {
+            val text = stringResource(R.string.signed_out)
             HomeScreenDialog(
                 onDismissRequest = {
                     openAlertDialog = false
@@ -174,15 +293,14 @@ fun HomeScreen(
                 onConfirmation = {
                     openAlertDialog = false
                     viewModel.signOut()
-                    handleBackPressHomeScreen(navController)
+                    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                    navController.popBackStack()
                 }
             )
         }
-        else {
-            handleBackPressHomeScreen(navController)
-        }
     }
 }
+
 
 @Composable
 fun HomeScreenDialog(
