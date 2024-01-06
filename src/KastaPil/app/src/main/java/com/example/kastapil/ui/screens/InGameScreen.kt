@@ -46,6 +46,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -56,6 +57,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.kastapil.R
 import com.example.kastapil.models.GameInfo
 import com.example.kastapil.navigation.Screen
+import com.example.kastapil.ui.components.CustomDialog
 import com.example.kastapil.viewModels.InGameViewModel
 import com.example.kastapil.viewModels.InGameViewModelFactory
 import kotlin.math.PI
@@ -165,7 +167,11 @@ fun InGameScreen(navController: NavController, viewModel: InGameViewModel) {
     }
 
     if (openAlertDialog) {
-        QuitGameDialog(
+        CustomDialog(
+            title = stringResource(id = R.string.quit_game_dialog_title),
+            text = stringResource(id = R.string.quit_game_dialog_description),
+            confirmText = stringResource(id = R.string.quit_game_dialog_confirm),
+            dismissText = stringResource(id = R.string.quit_game_dialog_dismiss),
             onDismissRequest = {
                 openAlertDialog = false
            },
@@ -518,44 +524,6 @@ fun handleBackPressInGameScreen(navController: NavController) {
     }
 }
 
-@Composable
-fun QuitGameDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit
-) {
-    AlertDialog(
-        icon = {
-            Icon(Icons.Default.Info, contentDescription = "Icon")
-        },
-        title = {
-            Text(text = "Quit game")
-        },
-        text = {
-            Text(text = "Do you want to quit the game? All progress will be lost.")
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Dismiss")
-            }
-        }
-    )
-}
 
 fun highlight(center: Offset, touchPoint: Offset, dartboardRadius: Float): Double {
     var touchedIndex: Double

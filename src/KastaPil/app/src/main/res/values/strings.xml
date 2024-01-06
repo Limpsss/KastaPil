@@ -12,10 +12,10 @@
 
 
     <!--  ________________  HOME SCREEN  ________________  -->
-    <string name="alert_dialog_title">Sign out</string>
-    <string name="alert_dialog_description">Do you want to sign out?</string>
-    <string name="alert_dialog_confirm">Sign out</string>
-    <string name="alert_dialog_dismiss">Cancel</string>
+    <string name="sign_out_dialog_title">Sign out</string>
+    <string name="sign_out_dialog_description">Do you want to sign out?</string>
+    <string name="sign_out_dialog_confirm">Sign out</string>
+    <string name="sign_out_dialog_dismiss">Cancel</string>
     <string name="signed_out">You signed out</string>
 
     <string name="sign_out_button">Sign out</string>
@@ -30,6 +30,10 @@
     <string name="home_description">Button that that takes you to the home screen</string>
     <string name="statistics_description">Button that takes you to the statistics screen</string>
     <string name="about_description">Button that takes you to the about screen</string>
+
+    <string name="statistics_dialog_title">Statistics</string>
+    <string name="statistics_dialog_description">You need to be signed in to access statistics</string>
+    <string name="statistics_dialog_confirm">Ok</string>
 
 
     <!--  ________________  CREATE GAME SCREEN  ________________  -->
@@ -49,6 +53,13 @@
     <string name="two_players">2 Players</string>
     <string name="player_one_placeholder">Player 1 name...</string>
     <string name="player_two_placeholder">Player 2 name...</string>
+
+
+    <!--  ________________  IN-GAME SCREEN  ________________  -->
+    <string name="quit_game_dialog_title">Quit game</string>
+    <string name="quit_game_dialog_description">Do you want to quit the game? All progress will be lost</string>
+    <string name="quit_game_dialog_confirm">Quit game</string>
+    <string name="quit_game_dialog_dismiss">Cancel</string>
 
 
     <!--  ________________  SETTINGS SCREEN  ________________  -->

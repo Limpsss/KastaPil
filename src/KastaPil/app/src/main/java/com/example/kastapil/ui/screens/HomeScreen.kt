@@ -3,6 +3,7 @@ package com.example.kastapil.ui.screens
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -63,6 +65,7 @@ import coil.compose.AsyncImage
 import com.example.kastapil.R
 import com.example.kastapil.navigation.Screen
 import com.example.kastapil.ui.components.AppBar
+import com.example.kastapil.ui.components.CustomDialog
 import com.example.kastapil.viewModels.HomeViewModel
 import kotlinx.coroutines.launch
 
@@ -81,7 +84,7 @@ fun HomeScreen(
     viewModel: HomeViewModel
 ) {
     var openAlertDialog by remember { mutableStateOf(false) }
-    val animatedBlur = animateDpAsState(targetValue = 30.dp, label = "")
+    var openStatisticsDialog by remember { mutableStateOf(false) }
     val userData = viewModel.userData
     val context = LocalContext.current
 
@@ -156,9 +159,15 @@ fun HomeScreen(
                                 }
                             }
                             when (item.id) {
-                                "statistics" -> navController.navigate(Screen.Statistics.route) {
-                                    popUpTo(Screen.Statistics.route) {
-                                        inclusive = true
+                                "statistics" -> {
+                                    if (viewModel.isSignedIn) {
+                                        navController.navigate(Screen.Statistics.route) {
+                                            popUpTo(Screen.Statistics.route) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    } else {
+                                        openStatisticsDialog = true
                                     }
                                 }
                             }
@@ -206,19 +215,10 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(contentPadding)
-                    .background(Color.Black),
+                    .background(MaterialTheme.colorScheme.background),
                 contentAlignment = Alignment.Center
             ) {
 
-                val painter1 = painterResource(id = R.drawable.darkgray2)
-                Image(
-                    painter = painter1,
-                    contentDescription = "background",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .blur(radius = animatedBlur.value),
-                    contentScale = ContentScale.Crop
-                )
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -234,20 +234,21 @@ fun HomeScreen(
                     )
                 }
 
-                Button(
-                    colors = ButtonDefaults.buttonColors(Color.LightGray),
+                OutlinedButton(
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer),
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 20.dp)
                         .size(width = 210.dp, height = 60.dp)
                         .fillMaxWidth(),
-
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),
                     onClick = {
                         navController.navigate(route = Screen.CreateGame.route)
                     }) {
                     Text(
                         text = stringResource(R.string.create_game_button),
-                        fontSize = 24.sp
+                        fontSize = 24.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -261,7 +262,11 @@ fun HomeScreen(
         // If back press and if user is signed in and open a dialog
         if (openAlertDialog) {
             val text = stringResource(R.string.signed_out)
-            HomeScreenDialog(
+            CustomDialog(
+                title = stringResource(R.string.sign_out_dialog_title),
+                text = stringResource(R.string.sign_out_dialog_description),
+                confirmText = stringResource(R.string.sign_out_dialog_confirm),
+                dismissText = stringResource(R.string.sign_out_dialog_dismiss),
                 onDismissRequest = {
                     openAlertDialog = false
                 },
@@ -273,53 +278,18 @@ fun HomeScreen(
                 }
             )
         }
-    }
-}
 
-
-@Composable
-fun HomeScreenDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit
-) {
-    AlertDialog(
-        icon = {
-            Icon(Icons.Default.Info, contentDescription = "Icon")
-        },
-        title = {
-            Text(text = stringResource(R.string.alert_dialog_title))
-        },
-        text = {
-            Text(text = stringResource(R.string.alert_dialog_description))
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text(text = stringResource(R.string.alert_dialog_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text(text = stringResource(R.string.alert_dialog_dismiss))
-            }
-        }
-    )
-}
-
-fun handleBackPressHomeScreen(navController: NavController) {
-    navController.navigate(Screen.SignIn.route) {
-        popUpTo(Screen.SignIn.route) {
-            inclusive = true
+        if (openStatisticsDialog) {
+            CustomDialog(
+                title = stringResource(R.string.statistics_dialog_title),
+                text = stringResource(R.string.statistics_dialog_description),
+                confirmText = stringResource(R.string.statistics_dialog_confirm),
+                showDismissButton = false,
+                onConfirmation = {
+                    openStatisticsDialog = false
+                },
+                onDismissRequest = {},
+            )
         }
     }
 }

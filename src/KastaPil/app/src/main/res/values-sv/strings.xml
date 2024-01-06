@@ -12,10 +12,10 @@
 
 
     <!--  ________________  HOME SCREEN  ________________  -->
-    <string name="alert_dialog_title">Logga ut</string>
-    <string name="alert_dialog_description">Vill du logga ut?</string>
-    <string name="alert_dialog_confirm">Logga ut</string>
-    <string name="alert_dialog_dismiss">Avbryt</string>
+    <string name="sign_out_dialog_title">Logga ut</string>
+    <string name="sign_out_dialog_description">Vill du logga ut?</string>
+    <string name="sign_out_dialog_confirm">Logga ut</string>
+    <string name="sign_out_dialog_dismiss">Avbryt</string>
     <string name="signed_out">Du loggades ut</string>
 
     <string name="sign_out_button">Logga ut</string>
@@ -30,6 +30,10 @@
     <string name="home_description">Knapp som tar dig till hemskärmen</string>
     <string name="statistics_description">Knapp som tar dig till statistikskärmen</string>
     <string name="about_description">Knapp som tar dig till infoskärmen</string>
+
+    <string name="statistics_dialog_title">Statistik</string>
+    <string name="statistics_dialog_description">Du måste vara inloggad för att få tillgång till statistik</string>
+    <string name="statistics_dialog_confirm">Ok</string>
 
 
     <!--  ________________  CREATE GAME SCREEN  ________________  -->
@@ -49,6 +53,13 @@
     <string name="two_players">2 Spelare</string>
     <string name="player_one_placeholder">Spelare 1 namn...</string>
     <string name="player_two_placeholder">Spelare 2 namn...</string>
+
+
+    <!--  ________________  IN-GAME SCREEN  ________________  -->
+    <string name="quit_game_dialog_title">Avsluta spel</string>
+    <string name="quit_game_dialog_description">Vill du avsluta spelet? Alla framsteg kommer att gå förlorade</string>
+    <string name="quit_game_dialog_confirm">Avsluta spel</string>
+    <string name="quit_game_dialog_dismiss">Avbryt</string>
 
 
     <!--  ________________  CREATE GAME SCREEN  ________________  -->

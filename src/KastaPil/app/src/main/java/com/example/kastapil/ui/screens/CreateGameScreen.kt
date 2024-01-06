@@ -27,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -59,7 +60,7 @@ fun CreateGameScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)
 
     ) {
@@ -79,7 +80,7 @@ fun CreateGameScreen(
                 imageVector = Icons.Rounded.ArrowBack,
                 contentDescription = stringResource(R.string.go_back_button),
                 modifier = Modifier.size(32.dp),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
 
@@ -97,13 +98,14 @@ fun CreateGameScreen(
         }
 
         // CREATE GAME BUTTON
-        Button(
-            colors = ButtonDefaults.buttonColors(Color.LightGray),
+        OutlinedButton(
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 20.dp)
                 .size(width = 210.dp, height = 60.dp)
                 .fillMaxWidth(),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),
 
             onClick = {
                 if (viewModel.validateNames()) {
@@ -118,7 +120,8 @@ fun CreateGameScreen(
             }) {
             Text(
                 text = stringResource(R.string.create_game_button),
-                fontSize = 24.sp
+                fontSize = 24.sp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
@@ -126,7 +129,6 @@ fun CreateGameScreen(
 
 @Composable
 fun GameTypeBox(viewModel: CreateGameViewModel) {
-    // Using the states from the CreateGameViewModel
     val is301Selected = viewModel.is301Selected.value
     val is501Selected = viewModel.is501Selected.value
 
@@ -135,7 +137,7 @@ fun GameTypeBox(viewModel: CreateGameViewModel) {
             .clip(RoundedCornerShape(18.dp))
             .width(300.dp)
             .height(120.dp)
-            .background(Color.DarkGray)
+            .background(MaterialTheme.colorScheme.primaryContainer)
 
     ) {
         Column() {
@@ -144,7 +146,7 @@ fun GameTypeBox(viewModel: CreateGameViewModel) {
                     .padding(12.dp),
                 text = stringResource(R.string.game_type),
                 fontSize = 16.sp,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
             Row(
@@ -185,7 +187,7 @@ fun BestOfBox(viewModel: CreateGameViewModel) {
             .clip(RoundedCornerShape(18.dp))
             .width(300.dp)
             .height(120.dp)
-            .background(Color.DarkGray)
+            .background(MaterialTheme.colorScheme.primaryContainer)
 
     ) {
         Column() {
@@ -194,7 +196,7 @@ fun BestOfBox(viewModel: CreateGameViewModel) {
                     .padding(12.dp),
                 text = stringResource(R.string.best_of),
                 fontSize = 16.sp,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
             Row(
@@ -242,7 +244,7 @@ fun ChoosePlayersBox(viewModel: CreateGameViewModel) {
             .clip(RoundedCornerShape(18.dp))
             .width(300.dp)
             .fillMaxHeight()
-            .background(Color.DarkGray)
+            .background(MaterialTheme.colorScheme.primaryContainer)
 
     ) {
         Column {
@@ -251,7 +253,7 @@ fun ChoosePlayersBox(viewModel: CreateGameViewModel) {
                     .padding(12.dp),
                 text = stringResource(R.string.players),
                 fontSize = 16.sp,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
             Row(
@@ -314,10 +316,10 @@ fun CustomTextField(player: String, viewModel: CreateGameViewModel) {
         modifier = Modifier
             .padding(5.dp),
             colors = TextFieldDefaults.textFieldColors(
-            textColor = Color.White,
-            unfocusedIndicatorColor = Color.Black,
+            textColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.secondaryContainer,
             focusedIndicatorColor = Color.Yellow,
-            containerColor = Color.Black
+            containerColor = MaterialTheme.colorScheme.primaryContainer
 
             ),
         shape = RoundedCornerShape(percent = 60),
@@ -352,10 +354,10 @@ fun CustomButton(
         } else {
             BorderStroke(0.dp, Color.Transparent)
         },
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
 
     ) {
-        Text(text = text, color = Color.White)
+        Text(text = text, color = MaterialTheme.colorScheme.onPrimaryContainer)
     }
 }
 
