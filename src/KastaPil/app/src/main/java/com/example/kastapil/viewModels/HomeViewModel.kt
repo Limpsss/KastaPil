@@ -17,6 +17,10 @@ class HomeViewModel(private val googleAuthClient: GoogleAuthClient): ViewModel()
     val userData = googleAuthClient.getSignedInUser()
     val isSignedIn = userData != null
 
+    init {
+        println(userData?.userId)
+    }
+
     fun signOut() {
         if (isSignedIn) {
             viewModelScope.launch {

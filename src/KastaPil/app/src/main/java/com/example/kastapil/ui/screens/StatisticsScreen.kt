@@ -50,6 +50,7 @@ fun StatisticsScreen(
     viewModel: StatisticsViewModel,
     navController: NavController
 ) {
+
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     Scaffold(
         modifier = Modifier
@@ -95,15 +96,39 @@ fun StatisticsScreen(
                         fontSize = 20.sp
                     )
 
-                    for (i in 1..10) {
-                        StatRow(
-                            text = "Darts thrown",
-                            data = "69",
-                            rowColor = if ( i % 2 == 0 )
-                                MaterialTheme.colorScheme.secondaryContainer else
-                                    MaterialTheme.colorScheme.primaryContainer
-                        )
-                    }
+                    StatRow(
+                        text = "Darts thrown",
+                        data = "${viewModel.getDartsThrown()}",
+                        rowColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+
+                    StatRow(
+                        text = "Most score hit",
+                        data = "${viewModel.getMostHitNumber()?.first} : ${viewModel.getMostHitNumber()?.second}",
+                        rowColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+
+                    StatRow(
+                        text = "Most double out",
+                        data = "${viewModel.getMostDoubleOut()?.first} : ${viewModel.getMostDoubleOut()?.second}",
+                        rowColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+
+                    StatRow(
+                        text = "Most single out",
+                        data = "${viewModel.getMostSingleOut()?.first} : ${viewModel.getMostSingleOut()?.second}",
+                        rowColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+
+//                    for (i in 1..10) {
+//                        StatRow(
+//                            text = "Darts thrown",
+//                            data = "69",
+//                            rowColor = if ( i % 2 == 0 )
+//                                MaterialTheme.colorScheme.secondaryContainer else
+//                                    MaterialTheme.colorScheme.primaryContainer
+//                        )
+//                    }
                 }
             }
 
@@ -121,15 +146,15 @@ fun StatisticsScreen(
                 ) {
                     // Title of box
                     Text(
-                        text = "Bad statistics",
+                        text = "Other statistics",
                         modifier = Modifier.padding(bottom = 6.dp),
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontSize = 20.sp
                     )
 
-                    for (i in 1..10) {
+                    for (i in 1..8) {
                         StatRow(
-                            text = "Bajs thrown",
+                            text = "Test",
                             data = "420",
                             rowColor = if ( i % 2 == 0 )
                                 MaterialTheme.colorScheme.secondaryContainer else

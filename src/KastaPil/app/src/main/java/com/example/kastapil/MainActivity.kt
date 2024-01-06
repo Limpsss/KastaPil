@@ -20,6 +20,9 @@ import com.example.kastapil.navigation.SetUpNavHost
 import com.example.kastapil.ui.theme.KastaPilTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +35,7 @@ class MainActivity : AppCompatActivity() {
             context = applicationContext,
             oneTapClient = Identity.getSignInClient(applicationContext)
         )
+
         // get curr lang on app system
         val currLangCode = AppCompatDelegate.getApplicationLocales().toLanguageTags()
         val appearanceManager = AppearanceManager(currLangCode)

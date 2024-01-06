@@ -2,10 +2,10 @@ package com.example.kastapil.models
 
 import androidx.compose.runtime.*
 
-class PlayerState(name: String, initialScore: Int) {
+class PlayerState(name: String, val initialScore: Int, val isAppUser: Boolean) {
     var name by mutableStateOf(name)
-    val initialScore = initialScore
     var currScore by mutableStateOf(initialScore)
+    var prevScore = initialScore
     var dartCount = 0
     var roundsUntilSingleOut by mutableStateOf(5)
     var onSingleOut = false
@@ -26,17 +26,24 @@ class PlayerState(name: String, initialScore: Int) {
         }
     }
 
-    fun endTurn() {
+    fun endTurn(isValidRound: Boolean) {
         // reset values when players turn ends
         dartCount = 0
         onSingleOut = false
         dart1 = ""
         dart2 = ""
         dart3 = ""
+
+        // If the round was invalid (score going to 1 or below 0) revert curr score to prev score
+        if (!isValidRound) {
+            currScore = prevScore
+        } else {
+            prevScore = currScore
+        }
     }
 
     fun endLeg(won: Boolean) {
-        endTurn()
+        endTurn(true)
         currScore = initialScore
         if (won) {
             legsWon += 1

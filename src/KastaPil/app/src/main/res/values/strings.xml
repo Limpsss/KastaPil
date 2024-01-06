@@ -26,6 +26,11 @@
     <string name="about">About</string>
     <string name="create_game_button">Create game</string>
 
+    <string name="settings_description">Button that takes you to the settings screen</string>
+    <string name="home_description">Button that that takes you to the home screen</string>
+    <string name="statistics_description">Button that takes you to the statistics screen</string>
+    <string name="about_description">Button that takes you to the about screen</string>
+
 
     <!--  ________________  CREATE GAME SCREEN  ________________  -->
     <string name="go_back_button">Go back</string>

@@ -92,26 +92,26 @@ fun HomeScreen(
     val items = listOf(
         MenuItem(
             id = "home",
-            title = "Home",
-            contentDescription = "home",
+            title = stringResource(id = R.string.home),
+            contentDescription = stringResource(id = R.string.home_description),
             icon = Icons.Default.Home,
         ),
         MenuItem(
             id = "statistics",
-            title = "Statistics",
-            contentDescription = "statistics",
+            title = stringResource(id = R.string.statistics),
+            contentDescription = stringResource(id = R.string.statistics_description),
             icon = Icons.Default.Person,
         ),
         MenuItem(
             id = "settings",
-            title = "Settings",
-            contentDescription = "settings",
+            title = stringResource(id = R.string.settings),
+            contentDescription = stringResource(id = R.string.settings_description),
             icon = Icons.Default.Settings,
         ),
         MenuItem(
             id = "about",
-            title = "About",
-            contentDescription = "about",
+            title = stringResource(id = R.string.about),
+            contentDescription = stringResource(id = R.string.about_description),
             icon = Icons.Default.Info,
         )
     )
@@ -224,29 +224,6 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = CenterHorizontally
                 ) {
-//                    Spacer(modifier = Modifier.height(16.dp))
-
-//                    if(userData?.profilePictureUrl != null) {
-//                        AsyncImage(
-//                            model = userData.profilePictureUrl,
-//                            contentDescription = "Profile picture",
-//                            modifier = Modifier
-//                                .size(70.dp)
-//                                .clip(CircleShape),
-//                            contentScale = ContentScale.Crop
-//                        )
-//                        Spacer(modifier = Modifier.height(8.dp))
-//                    }
-//                    if(userData?.username != null) {
-//                        Text(
-//                            text = userData.username,
-//                            textAlign = TextAlign.Center,
-//                            fontSize = 16.sp,
-//                            fontWeight = FontWeight.SemiBold,
-//                            color = Color.LightGray
-//                        )
-//                        Spacer(modifier = Modifier.height(10.dp))
-//                    }
 
                     val painter2 = painterResource(id = R.drawable.dart2)
                     Image(
@@ -256,8 +233,6 @@ fun HomeScreen(
                             .fillMaxWidth(),
                     )
                 }
-
-
 
                 Button(
                     colors = ButtonDefaults.buttonColors(Color.LightGray),

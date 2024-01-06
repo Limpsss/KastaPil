@@ -7,15 +7,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.kastapil.models.DartData
+import com.example.kastapil.models.DataManager
 import com.example.kastapil.models.GameInfo
 import com.example.kastapil.models.PlayerState
+import com.example.kastapil.models.UserData
 
-class InGameViewModelFactory(private val gameInfo: GameInfo) :
+class InGameViewModelFactory(private val gameInfo: GameInfo, private val userData: UserData?) :
     ViewModelProvider.NewInstanceFactory() {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = InGameViewModel(gameInfo) as T
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = InGameViewModel(gameInfo, userData) as T
 }
 
-class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
+class InGameViewModel(private val gameInfo: GameInfo, private val userData: UserData?) : ViewModel() {
+
+    private val dataManager: DataManager?
+    init {
+        if (userData != null)
+            dataManager = DataManager(userData)
+        else
+            dataManager = null
+    }
 
     private val dartboardMapping = mapOf<Int, Int>(
         0 to 6,
@@ -49,12 +60,12 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
     // Initialize players
     private val players = if (gameInfo.playerAmount == 2) {
         listOf(
-            PlayerState(gameInfo.playerOneName, gameInfo.gameType),
-            PlayerState(gameInfo.playerTwoName, gameInfo.gameType)
+            PlayerState(gameInfo.playerOneName, gameInfo.gameType, true),
+            PlayerState(gameInfo.playerTwoName, gameInfo.gameType, false)
         )
     } else {
         listOf(
-            PlayerState(gameInfo.playerOneName, gameInfo.gameType)
+            PlayerState(gameInfo.playerOneName, gameInfo.gameType, true)
         )
     }
     // Observable state for the current player index
@@ -62,6 +73,7 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
     // Current player as a state
     var currentPlayer by mutableStateOf(players[currentPlayerIndex])
     var drawingDarts by mutableStateOf(listOf<Offset>())
+    var dartsThrown = mutableListOf<DartData>()
 
     fun throwDart(index: Int, type: String, point: Offset) {
         // If valid dart
@@ -72,6 +84,8 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
         if (validScore) {
             currentPlayer.updateScore(points, scoreText)
             drawingDarts += point
+            addNewDart(points, type, currentPlayer)
+
             if (currentPlayer.currScore == 0) {
                 // call a win set function
                 endLeg()
@@ -79,12 +93,15 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
         }
         else {
             currentPlayer.updateScore(0, "TJOCK")
+            endTurn(false)
         }
         // Draw dart on screen
-        endTurn()
+        if (currentPlayer.dartCount == 3) {
+            endTurn(true)
+        }
     }
     // Score = Dart score, type = single, double or triple
-    fun calculateScore(index: Int, type: String): Int {
+    private fun calculateScore(index: Int, type: String): Int {
         var points = 0
         if (type == "OuterBullseye") {
             points = 25
@@ -101,18 +118,6 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
         }
 
         return points
-//        val newScore = currentPlayer.currScore - points
-//        if (checkValidNewScore(newScore, type)) {
-//            // update current player score
-//            updateScore(points, type)
-//            if (currentPlayer.currScore == 0) {
-//                // call a win set function
-//                endLeg()
-//            }
-//        }
-//        // ends turn if 3 darts have been thrown
-//        endTurn(currentPlayer.currScore, newScore)
-//        return res
     }
 
     private fun checkValidNewScore(points: Int, type: String): Boolean {
@@ -167,16 +172,14 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
         return scoreText
     }
 
-    private fun endTurn() {
-        // end turn if player has thrown 3 darts
-        if (currentPlayer.dartCount == 3) {
-            // clear darts on ui
-            drawingDarts = listOf()
-            currentPlayer.endTurn()
+    private fun endTurn(isValidRound: Boolean) {
+        // clear darts on ui
+        drawingDarts = listOf()
+        currentPlayer.endTurn(isValidRound)
 
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.size
-            currentPlayer = players[currentPlayerIndex]
-        }
+
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.size
+        currentPlayer = players[currentPlayerIndex]
 
 //        if (!playerOneState.onSingleOut) {
 //            if (prevScore >= 50 && newScore < 50) {
@@ -187,6 +190,7 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
 
     private fun endLeg() {
         // do some ui stuff
+        drawingDarts = listOf()
 
         for(player in players) {
             var won = false
@@ -205,8 +209,22 @@ class InGameViewModel(public val gameInfo: GameInfo) : ViewModel() {
         }
     }
 
+    private fun addNewDart(points: Int, type: String,  currentPlayer: PlayerState) {
+        val scoreText = getScoreText(points, type)
+        // isSingleOut = If dart was a finishing round single out dart
+        val isSingleOut = currentPlayer.onSingleOut && currentPlayer.currScore == 0
+        // isDoubleOut = If dart was a finishing round double out dart
+        val isDoubleOut = !currentPlayer.onSingleOut && currentPlayer.currScore == 0
+
+        dartsThrown.add(DartData(scoreText, isSingleOut, isDoubleOut))
+    }
+
     private fun endGame() {
         Log.d("ingameviewmodel", "YOU WOOOOOON!")
         // some ui stuff or whatever
+        saveGameData(dartsThrown)
+    }
+    private fun saveGameData(dartsThrown: List<DartData>) {
+        dataManager?.saveGameData(dartsThrown)
     }
 }

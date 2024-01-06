@@ -26,6 +26,11 @@
     <string name="about">Om</string>
     <string name="create_game_button">Skapa spel</string>
 
+    <string name="settings_description">Knapp som tar dig till inställningar</string>
+    <string name="home_description">Knapp som tar dig till hemskärmen</string>
+    <string name="statistics_description">Knapp som tar dig till statistikskärmen</string>
+    <string name="about_description">Knapp som tar dig till infoskärmen</string>
+
 
     <!--  ________________  CREATE GAME SCREEN  ________________  -->
     <string name="go_back_button">Gå tillbaka</string>

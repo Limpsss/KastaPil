@@ -79,7 +79,8 @@ fun SignInScreen(
                                 signInIntentSender ?: return@launch
                             ).build())
                     }
-            }) {
+                }
+            ) {
                 Text(text = stringResource(R.string.sign_in_google))
             }
 
@@ -93,7 +94,8 @@ fun SignInScreen(
                             inclusive = true
                         }
                     }
-            }) {
+                }
+            ) {
                 Text(text = stringResource(R.string.sign_in_guest))
             }
         }

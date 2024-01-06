@@ -26,6 +26,8 @@ import com.example.kastapil.viewModels.SettingsViewModelFactory
 import com.example.kastapil.viewModels.SignInViewModel
 import com.example.kastapil.viewModels.SignInViewModelFactory
 import com.example.kastapil.viewModels.StatisticsViewModel
+import com.example.kastapil.viewModels.StatisticsViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
@@ -38,7 +40,7 @@ fun SetUpNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Statistics.route
+        startDestination = Screen.SignIn.route
     ){
 
         // Sign in screen
@@ -81,7 +83,7 @@ fun SetUpNavHost(
             val gameInfo: GameInfo = Gson().fromJson(jsonGameInfo, type)
             //val inGameViewModel: InGameViewModel = viewModel()
             val inGameViewModel: InGameViewModel =
-                viewModel(factory = InGameViewModelFactory(gameInfo)) // pass param like this
+                viewModel(factory = InGameViewModelFactory(gameInfo, googleAuthClient.getSignedInUser())) // pass param like this
             InGameScreen(navController, inGameViewModel)
         }
 
@@ -98,7 +100,8 @@ fun SetUpNavHost(
         composable(
             route = Screen.Statistics.route
         ){
-            val statisticsViewModel: StatisticsViewModel = viewModel()
+            val statisticsViewModel: StatisticsViewModel =
+                viewModel(factory = StatisticsViewModelFactory(googleAuthClient.getSignedInUser()))
             StatisticsScreen(statisticsViewModel, navController)
         }
     }

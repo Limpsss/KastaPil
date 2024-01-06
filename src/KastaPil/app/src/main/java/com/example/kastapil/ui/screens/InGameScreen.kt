@@ -615,11 +615,11 @@ fun pointRing(
     }
 }
 
-@Preview
-@Composable
-fun InGameScreenPreview() {
-    val mockNavController = rememberNavController() // Simple NavController for preview
-    val mockViewModel: InGameViewModel =
-        viewModel(factory = InGameViewModelFactory(GameInfo(1, 1, 1, "", ""))) // pass param like this
-    InGameScreen(mockNavController, mockViewModel)
-}
+//@Preview
+//@Composable
+//fun InGameScreenPreview() {
+//    val mockNavController = rememberNavController() // Simple NavController for preview
+//    val mockViewModel: InGameViewModel =
+//        viewModel(factory = InGameViewModelFactory(GameInfo(1, 1, 1, "", ""))) // pass param like this
+//    InGameScreen(mockNavController, mockViewModel)
+//}
