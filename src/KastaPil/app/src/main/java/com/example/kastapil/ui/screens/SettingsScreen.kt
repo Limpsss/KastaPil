@@ -125,17 +125,20 @@ fun SettingsScreen(viewModel: SettingsViewModel, navController: NavController) {
                         )
 
                         val themes = arrayOf("Auto", "DömD Light", "DömD Dark")
-                        val selectedTheme by remember { mutableStateOf(themes.first()) }
+                        var selectedTheme by remember { mutableStateOf(themes.first()) }
                         CustomDropdownMenu(
                             modifier = Modifier.weight(1.2f),
                             items = themes,
                             selectedItem = selectedTheme,
                             onItemSelected = { theme ->
                                 if (themes.indexOf(theme) == 0) {
+                                    selectedTheme = theme
                                     viewModel.changeTheme(null)
                                 } else if (themes.indexOf(theme) == 1) {
+                                    selectedTheme = theme
                                     viewModel.changeTheme(false)
                                 } else if (themes.indexOf(theme) == 2) {
+                                    selectedTheme = theme
                                     viewModel.changeTheme(true)
                                 }
                             }

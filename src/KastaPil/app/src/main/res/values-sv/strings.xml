@@ -18,6 +18,8 @@
     <string name="sign_out_dialog_dismiss">Avbryt</string>
     <string name="signed_out">Du loggades ut</string>
 
+    <string name="pfp_description">Användarbild</string>
+
     <string name="sign_out_button">Logga ut</string>
     <string name="settings">Inställningar</string>
     <string name="menu">Meny</string>

@@ -100,7 +100,8 @@ class InGameViewModel(private val gameInfo: GameInfo, private val userData: User
             endTurn(true)
         }
     }
-    // Score = Dart score, type = single, double or triple
+
+
     private fun calculateScore(index: Int, type: String): Int {
         var points = 0
         if (type == "OuterBullseye") {

@@ -126,7 +126,7 @@ fun HomeScreen(
                 if(userData?.profilePictureUrl != null) {
                     AsyncImage(
                         model = userData.profilePictureUrl,
-                        contentDescription = "Profile picture",
+                        contentDescription = stringResource(R.string.pfp_description),
                         modifier = Modifier
                             .align(CenterHorizontally)
                             .size(110.dp)
@@ -142,7 +142,7 @@ fun HomeScreen(
                         textAlign = TextAlign.Center,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.LightGray
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                 }
@@ -274,7 +274,12 @@ fun HomeScreen(
                     openAlertDialog = false
                     viewModel.signOut()
                     Toast.makeText(context, text, Toast.LENGTH_LONG).show()
-                    navController.popBackStack()
+                    navController.navigate(Screen.SignIn.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true // Include the start destination in the pop
+                        }
+                        launchSingleTop = true
+                    }
                 }
             )
         }

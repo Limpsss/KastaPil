@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 class SignInViewModelFactory(private val googleAuthClient: GoogleAuthClient) :
     ViewModelProvider.NewInstanceFactory() {
     override fun <T : ViewModel> create(modelClass: Class<T>): T = SignInViewModel(googleAuthClient) as T
-
 }
 
 data class SignInState(
@@ -33,9 +32,11 @@ data class SignInState(
 
 class SignInViewModel(private val googleAuthClient: GoogleAuthClient) : ViewModel() {
 
+    // Holds the state of the sign-in process
     private val _state = MutableStateFlow(SignInState())
     val state = _state.asStateFlow()
 
+    // Updates the state based on the result of the sign-in process
     fun onSignInResult(result: SignInResult) {
         _state.update { it.copy(
             isSignInSuccessful = result.data != null,
@@ -47,7 +48,7 @@ class SignInViewModel(private val googleAuthClient: GoogleAuthClient) : ViewMode
         return googleAuthClient.signIn()
     }
 
-    // Function to handle the sign-in result
+    // Handles the result from the sign-in intent and updates the state
     fun handleSignInResult(data: Intent?) {
         viewModelScope.launch {
             val signInResult = googleAuthClient.signInWithIntent(

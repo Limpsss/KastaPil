@@ -19,19 +19,23 @@ class GoogleAuthClient(
 ) {
     private val auth = Firebase.auth
 
+    // Initiates a sign-in process using Google's One Tap sign-in
     suspend fun signIn(): IntentSender? {
         val result = try {
+            // Build and start the sign-in request
             oneTapClient.beginSignIn(
                 buildSignInRequest()
             ).await()
         } catch (e: Exception) {
             e.printStackTrace()
+            println("i failed $e")
             if(e is CancellationException) throw e
             null
         }
         return result?.pendingIntent?.intentSender
     }
 
+    // Completes the sign-in process using the intent data received
     suspend fun signInWithIntent(intent: Intent): SignInResult {
         val credential = oneTapClient.getSignInCredentialFromIntent(intent)
         val googleIdToken = credential.googleIdToken
@@ -39,6 +43,7 @@ class GoogleAuthClient(
 
         return try {
             val user = auth.signInWithCredential(googleCredentials).await().user
+            // Return the sign-in result with user data
             SignInResult(
                 data = user?.run {
                     UserData(
@@ -59,6 +64,7 @@ class GoogleAuthClient(
         }
     }
 
+    // Signs the user out from Google and Firebase
     suspend fun signOut() {
         try {
             oneTapClient.signOut().await()
@@ -76,6 +82,7 @@ class GoogleAuthClient(
         )
     }
 
+    // Builds the sign-in request for Google's One Tap sign-in
     private fun buildSignInRequest(): BeginSignInRequest {
         return BeginSignInRequest.Builder()
             .setGoogleIdTokenRequestOptions(
