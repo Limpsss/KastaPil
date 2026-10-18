@@ -1,23 +1,36 @@
-Beskrivning:
+# KastaPil 🎯
 
-Denna app är till för dig som tycker om att spela dart. Appen beräknar och håller koll på dina poäng när du spelar dart. Du kan antingen spela själv och träna upp din kastarm utan och hålla koll på hur du faktiskt kastar utan att själv behöva räkna, eller så kan du spela mot din kompis och tävla vem som är den bästa dartspelaren. 
+An Android app that keeps score while you play darts. Throw your darts in real life, tap where they landed on the on-screen dartboard, and KastaPil handles the math.
 
-I appen så sätter upp ett spel i en meny med olika regler, sedan kommer du in i ett spel och kan börja att beräkna poängen. Tanken är att du i verkliga liver spelar dart. Du kommer att kasta din pilar och i appen manuellt trycka in vart du träffade på tavlan så kommer appen att räkna ihop poängen automatiskt så du slipper beräkna poängen själv. När du har spelat klart ett spel och någon har vunnit så kommer en del data från matchen att sparas i en databas. All data som sparas kan du också ta del utav i statistiksidan i appen. Där kan du kolla vart på tavlan du oftast träffar, hur många pilar du kastat, vilken dubbel du oftast går ut på och liknande statistik.
+> **Status:** University project (TDP028, Linköping University, 2023). It's functional but unfinished. Some screens (for example *About*) and features are only partially implemented.
 
-Jag hade ambitionen för en 5a, men eftersom jag kör kotlin och jetpack compose så fanns det mindre tekniska krav att välja bland men jag hoppas det räcker.
+## Features
 
-Avklarade projektkrav (enligt mig)
-Tekniska krav:
-1. "Modulär kod". Jag använder mig av MVVM architecture som google rekommenderar
-2. "Portabla Fragment". 
-3. "Hantering av bakåtknapp". Jag hanterar backstacken och jag anropar dialoger så att bakåtknappen inte förstör användarupplevelsen.
-4. "Hantera, dvs. hålla koll på inloggningsstatus". Jag håller koll på om en användare är inloggad via google eller enbart som gäst. Jag har implementerat så att endast inloggade användare kan spara och se sin statistik.
-5. "Eget förslag på någon teknisk finess" Hur jag löste touch-hantering så jag vet vart på tavlan jag släppte fingret för att räkna poäng i InGameScreen.
+- **Game setup:** 301 or 501, best of 1/3/5, one or two players
+- **Touch-based scoring:** tap the dartboard where the dart hit. Custom hit detection maps the touch position to the right segment and multiplier
+- **Statistics:** where on the board you hit most, darts thrown, most-used checkout doubles, and more (signed-in users only)
+- **Google sign-in** or play as a guest
+- **Cloud storage:** match data is saved to Firebase Firestore per user
+- **Localization:** English and Swedish
+- **Theming:** light and dark mode
 
-Entreprenöriella krav:
-1. "Firestore" Jag använder mig av firestore för att spara data.
-2. "Multispråk-stöd" Appen stödjer både svenska och engelska.
-3. "UX inställning" Appen stödjer mörkt och ljust tema.
-4. "Kontohantering" Jag sparar statistik för varje inloggad användare som visas på statistiksidan
-5. "Tredjepartsinloggning" Inloggning med google
+## Tech stack
 
+- Kotlin + Jetpack Compose (Material 3)
+- MVVM architecture with ViewModels
+- Navigation Compose
+- Firebase Authentication (Google) and Cloud Firestore
+- Coil for image loading
+
+## Project structure
+
+```
+app/src/main/java/com/example/kastapil/
+├── models/       # Data classes, Firestore access, auth client, app state
+├── navigation/   # NavGraph and screen routes
+├── ui/
+│   ├── components/  # Reusable composables (app bar, dialogs, dropdowns)
+│   ├── screens/     # Sign-in, home, create game, in-game, statistics, settings
+│   └── theme/       # Colors, typography, theme
+└── viewModels/   # One ViewModel per screen
+```
